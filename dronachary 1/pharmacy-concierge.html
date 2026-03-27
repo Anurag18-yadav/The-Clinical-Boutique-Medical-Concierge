@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pharmacy Concierge – The Clinical Boutique</title>
+  <meta name="description" content="AI-powered pharmacy & medicine concierge for The Clinical Boutique."/>
+
+  <!-- Google Fonts: Playfair Display + DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans:  ['"DM Sans"', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            sky:   '#48CAE4',
+            sage:  '#52B788',
+            gold:  '#E9C46A',
+            navy:  '#013A63',
+            teal:  '#005F73',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* ── Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(160deg, #013A63 0%, #01497C 45%, #005F73 100%) fixed;
+      color: #fff;
+    }
+
+    /* ── Glassmorphism helpers ── */
+    .glass {
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+    .glass-strong {
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    /* ── Sticky header ── */
+    #siteHeader {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(1,26,50,0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* ── Custom scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: rgba(72,202,228,0.35); border-radius: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+
+    /* ── Select dropdown ── */
+    .styled-select {
+      appearance: none;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(72,202,228,0.4);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 14px 48px 14px 18px;
+      border-radius: 14px;
+      width: 100%;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2348CAE4' stroke-width='2.5' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+    .styled-select:focus { border-color: #48CAE4; box-shadow: 0 0 0 3px rgba(72,202,228,0.18); }
+    .styled-select option { background: #01324E; color: #fff; }
+
+    /* ── Card animation ── */
+    @keyframes cardReveal {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .medicine-card { animation: cardReveal 0.45s ease both; }
+
+    /* ── SVG ring ── */
+    .ring-track { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 7; }
+    .ring-fill  { fill: none; stroke: #52B788; stroke-width: 7;
+                  stroke-linecap: round; transition: stroke-dashoffset 0.9s ease; }
+
+    /* ── Price table ── */
+    .price-row { display: flex; align-items: center; justify-content: space-between;
+                 padding: 8px 12px; border-radius: 8px; transition: background 0.15s; }
+    .price-row:hover { background: rgba(255,255,255,0.06); }
+    .best-badge {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 2px 8px; border-radius: 20px;
+      background: rgba(233,196,106,0.22); color: #E9C46A;
+      border: 1px solid rgba(233,196,106,0.45);
+    }
+
+    /* ── Buy button ── */
+    .buy-btn {
+      display: block; width: 100%; text-align: center;
+      padding: 12px; border-radius: 12px; font-weight: 700;
+      font-size: 14px; letter-spacing: 0.02em;
+      background: linear-gradient(135deg, #48CAE4, #0096C7);
+      color: #013A63; text-decoration: none;
+      box-shadow: 0 4px 18px rgba(72,202,228,0.35);
+      transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+    .buy-btn:hover {
+      filter: brightness(1.12);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(72,202,228,0.5);
+    }
+
+    /* ── Floating interaction alert ── */
+    @keyframes floatBob {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(-9px); }
+    }
+    #interactionAlert {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      animation: floatBob 3s ease-in-out infinite;
+      z-index: 999; cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* ── Avatar ── */
+    .avatar-ring {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: linear-gradient(135deg, #48CAE4, #0096C7);
+      display: grid; place-items: center;
+      font-weight: 800; font-size: 15px; color: #013A63;
+      border: 2px solid rgba(255,255,255,0.3);
+      flex-shrink: 0;
+    }
+
+    /* ── Empty state ── */
+    #emptyState { animation: cardReveal 0.5s ease; }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.1em; color: rgba(255,255,255,0.45);
+    }
+
+    /* <!-- UPDATED --> Back button — ghost/outline style */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+      color: #48CAE4; text-decoration: none;
+      padding: 5px 12px; border-radius: 8px;
+      border: 1.5px solid rgba(72,202,228,0.45);
+      background: transparent;
+      transition: background 0.18s ease, border-color 0.18s ease,
+                  color 0.18s ease, transform 0.15s ease;
+      width: fit-content;
+    }
+    .back-btn:hover {
+      background: rgba(72,202,228,0.14);
+      border-color: #48CAE4;
+      color: #fff;
+      transform: translateX(-2px);
+    }
+    .back-btn:active { transform: translateX(0) scale(0.97); }
+  </style>
+</head>
+<body>
+
+  <!-- ════ STICKY HEADER ════ -->
+  <header id="siteHeader">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+
+      <!-- UPDATED: Left — Back button + Title stacked -->
+      <div class="flex flex-col gap-1.5">
+        <!-- Back button -->
+        <button class="back-btn" onclick="window.location.href='dashboard.html'">
+          ← Dashboard
+        </button>
+
+        <!-- Page title -->
+        <h1 class="font-serif text-xl md:text-2xl font-bold text-white leading-tight">
+          💊 Pharmacy &amp; Medicine Concierge
+        </h1>
+        <p class="text-xs" style="color:rgba(255,255,255,0.45)">
+          The Clinical Boutique · AI-Powered Drug Intelligence
+        </p>
+      </div>
+
+      <!-- Right: User -->
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <div style="text-align:right">
+          <div id="headerName" class="text-sm font-semibold text-white">Anurag Yadav</div>
+          <div class="text-xs font-medium" style="color:#E9C46A">Chief Resident</div>
+        </div>
+        <div id="headerAvatar" class="avatar-ring">AY</div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ════ MAIN CONTENT ════ -->
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-10 pb-36">
+
+    <!-- ── SEARCH SECTION ── -->
+    <div class="glass-strong rounded-2xl p-6 md:p-8 mb-10 max-w-xl mx-auto text-center">
+      <p class="section-label mb-3">Symptom-Based Medicine Finder</p>
+      <h2 class="font-serif text-2xl font-bold text-white mb-6">Select Your Symptoms</h2>
+
+      <select class="styled-select" id="symptomSelect" onchange="renderMedicines(this.value)">
+        <option value="" disabled selected>— Choose a symptom —</option>
+        <option value="Fever">🌡️ Fever</option>
+        <option value="Headache">🤕 Headache</option>
+        <option value="Cough">😮‍💨 Cough</option>
+        <option value="Cold">🤧 Cold</option>
+        <option value="Acidity">🔥 Acidity</option>
+        <option value="Body Pain">💪 Body Pain</option>
+        <option value="Allergy">🌿 Allergy</option>
+        <option value="Diarrhea">🏃 Diarrhea</option>
+        <option value="Nausea">🤢 Nausea</option>
+        <option value="Insomnia">😴 Insomnia</option>
+      </select>
+
+      <!-- Selected symptom label -->
+      <p id="chosenLabel" class="mt-4 text-sm hidden" style="color:#48CAE4">
+        Showing recommendations for: <span id="chosenText" class="font-semibold"></span>
+      </p>
+    </div>
+
+    <!-- ── MEDICINE GRID / EMPTY STATE ── -->
+    <div id="emptyState" class="text-center py-20">
+      <div class="text-7xl mb-5">🔬</div>
+      <p class="text-lg font-medium" style="color:rgba(255,255,255,0.45)">
+        Select a symptom above to view personalized medicine suggestions
+      </p>
+    </div>
+
+    <div id="medicineGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"></div>
+
+  </main>
+
+  <!-- ════ FLOATING INTERACTION ALERT ════ -->
+  <div id="interactionAlert"
+       class="glass px-5 py-3 rounded-full flex items-center gap-3"
+       style="border-color:#48CAE4;border-width:1px;box-shadow:0 8px 32px rgba(72,202,228,0.2)"
+       onclick="alert('No interactions detected with your active prescriptions.')">
+    <span class="text-base">🛡️</span>
+    <span class="text-sm font-medium" style="color:rgba(255,255,255,0.85)">
+      Interaction Check: This medicine is safe with your recent prescriptions.
+    </span>
+    <span class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:rgba(72,202,228,0.2);color:#48CAE4">SAFE</span>
+  </div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   AUTH GUARD — redirect if not logged in
+═══════════════════════════════════════════════════ */
+(function() {
+  const user = localStorage.getItem('registeredUser');
+  if (!user) {
+    window.location.href = 'login.html';
+  } else {
+    // Personalize header name from stored user
+    const parsed = JSON.parse(user);
+    const nameEl = document.getElementById('headerName');
+    const avatarEl = document.getElementById('headerAvatar');
+    if (nameEl && parsed.name) {
+      nameEl.textContent = parsed.name;
+      const initials = parsed.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      if (avatarEl) avatarEl.textContent = initials;
+    }
+  }
+})();
+
+/* ═══════════════════════════════════════════════════
+   MEDICINE DATABASE
+═══════════════════════════════════════════════════ */
+const MEDICINE_DB = {
+  "Fever": [
+    {
+      name: "Dolo 650",
+      use: "Paracetamol 650mg — reduces fever & mild pain",
+      safetyScore: 97,
+      emoji: "🌡️",
+      prices: {
+        "1mg":       { price: "₹28", url: "https://www.1mg.com/drugs/dolo-650-tablet-267247" },
+        "Apollo":    { price: "₹35", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹30", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Crocin Advance",
+      use: "Paracetamol 500mg — fast-acting antipyretic",
+      safetyScore: 95,
+      emoji: "💊",
+      prices: {
+        "1mg":       { price: "₹32", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹38", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹29", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Meftal Spas",
+      use: "Mefenamic Acid — antipyretic with anti-inflammatory action",
+      safetyScore: 88,
+      emoji: "🔴",
+      prices: {
+        "1mg":       { price: "₹45", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹52", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹43", url: "https://pharmeasy.in" }
+      }
+    }
+  ],
+  "Headache": [
+    {
+      name: "Saridon",
+      use: "Paracetamol + Caffeine — fast headache relief",
+      safetyScore: 91,
+      emoji: "🤕",
+      prices: {
+        "1mg":       { price: "₹18", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹24", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹20", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Sumo L Tablet",
+      use: "Nimesulide 100mg — NSAID for tension headache",
+      safetyScore: 86,
+      emoji: "💊",
+      prices: {
+        "1mg":       { price: "₹22", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹28", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹21", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Combiflam",
+      use: "Ibuprofen + Paracetamol — combined analgesic",
+      safetyScore: 90,
+      emoji: "🟠",
+      prices: {
+        "1mg":       { price: "₹30", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹36", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹28", url: "https://pharmeasy.in" }
+      }
+    }
+  ],
+  "Cough": [
+    {
+      name: "Benadryl Cough",
+      use: "Diphenhydramine — suppressant for dry cough",
+      safetyScore: 89,
+      emoji: "😮‍💨",
+      prices: {
+        "1mg":       { price: "₹75", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹88", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹72", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Alex Syrup",
+      use: "Chlorpheniramine + Dextromethorphan — wet & dry cough",
+      safetyScore: 87,
+      emoji: "🍶",
+      prices: {
+        "1mg":       { price: "₹68", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹80", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹65", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Ascoril LS",
+      use: "Levosalbutamol + Ambroxol — bronchodilator combination",
+      safetyScore: 84,
+      emoji: "💨",
+      prices: {
+        "1mg":       { price: "₹110", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹125", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹105", url: "https://pharmeasy.in" }
+      }
+    }
+  ],
+  "Cold": [
+    {
+      name: "Sinarest",
+      use: "Paracetamol + Cetirizine + Pseudoephedrine — cold combo",
+      safetyScore: 90,
+      emoji: "🤧",
+      prices: {
+        "1mg":       { price: "₹40", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹48", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹38", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Vicks Action 500",
+      use: "Multi-symptom cold tablet — decongestant + analgesic",
+      safetyScore: 87,
+      emoji: "❄️",
+      prices: {
+        "1mg":       { price: "₹35", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹42", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹33", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Nasivion Nasal Spray",
+      use: "Oxymetazoline — nasal decongestant spray",
+      safetyScore: 88,
+      emoji: "💧",
+      prices: {
+        "1mg":       { price: "₹95", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹110", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹90", url: "https://pharmeasy.in" }
+      }
+    }
+  ],
+  "Acidity": [
+    {
+      name: "Pantoprazole 40mg",
+      use: "Proton pump inhibitor — reduces stomach acid production",
+      safetyScore: 96,
+      emoji: "🔥",
+      prices: {
+        "1mg":       { price: "₹48", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹58", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹45", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Gelusil Syrup",
+      use: "Aluminium hydroxide — antacid for quick heartburn relief",
+      safetyScore: 94,
+      emoji: "🍶",
+      prices: {
+        "1mg":       { price: "₹82", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹95", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹78", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Ranitidine 150mg",
+      use: "H2 blocker — reduces acid for ulcers & GERD",
+      safetyScore: 88,
+      emoji: "💊",
+      prices: {
+        "1mg":       { price: "₹30", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹38", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹28", url: "https://pharmeasy.in" }
+      }
+    }
+  ],
+  "Body Pain": [
+    {
+      name: "Brufen 400",
+      use: "Ibuprofen 400mg — NSAID for muscle & joint pain",
+      safetyScore: 90,
+      emoji: "💪",
+      prices: {
+        "1mg":       { price: "₹35", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹42", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹33", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Voveran SR 100",
+      use: "Diclofenac 100mg — sustained-release pain relief",
+      safetyScore: 86,
+      emoji: "🟡",
+      prices: {
+        "1mg":       { price: "₹52", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹62", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹50", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Moov Strong Gel",
+      use: "Diclofenac topical gel — targeted pain zone relief",
+      safetyScore: 93,
+      emoji: "🧴",
+      prices: {
+        "1mg":       { price: "₹148", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹162", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹142", url: "https://pharmeasy.in" }
+      }
+    }
+  ],
+  "Allergy": [
+    {
+      name: "Cetirizine 10mg",
+      use: "Second-gen antihistamine — non-drowsy allergy relief",
+      safetyScore: 97,
+      emoji: "🌿",
+      prices: {
+        "1mg":       { price: "₹14", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹18", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹13", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Montair LC",
+      use: "Montelukast + Levocetirizine — allergic rhinitis",
+      safetyScore: 92,
+      emoji: "💊",
+      prices: {
+        "1mg":       { price: "₹68", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹80", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹65", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Avil 25mg",
+      use: "Pheniramine — first-gen antihistamine, for acute allergy",
+      safetyScore: 85,
+      emoji: "🔵",
+      prices: {
+        "1mg":       { price: "₹22", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹28", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹20", url: "https://pharmeasy.in" }
+      }
+    }
+  ],
+  "Diarrhea": [
+    {
+      name: "ORS Sachets (Electral)",
+      use: "Oral rehydration salts — replenish electrolytes",
+      safetyScore: 99,
+      emoji: "💧",
+      prices: {
+        "1mg":       { price: "₹22", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹28", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹20", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Loperamide (Lopamide)",
+      use: "Antidiarrheal — slows gut motility",
+      safetyScore: 88,
+      emoji: "🏃",
+      prices: {
+        "1mg":       { price: "₹18", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹24", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹17", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Norflox TZ",
+      use: "Norfloxacin + Tinidazole — antibiotic for acute diarrhea",
+      safetyScore: 82,
+      emoji: "🧪",
+      prices: {
+        "1mg":       { price: "₹55", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹65", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹52", url: "https://pharmeasy.in" }
+      }
+    }
+  ],
+  "Nausea": [
+    {
+      name: "Perinorm (Metoclopramide)",
+      use: "Antiemetic — reduces nausea & vomiting",
+      safetyScore: 87,
+      emoji: "🤢",
+      prices: {
+        "1mg":       { price: "₹24", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹30", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹22", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Emeset 4mg (Ondansetron)",
+      use: "5-HT3 antagonist — for severe nausea & chemotherapy",
+      safetyScore: 93,
+      emoji: "💊",
+      prices: {
+        "1mg":       { price: "₹62", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹75", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹58", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Avomine (Promethazine)",
+      use: "Antihistamine antiemetic — motion sickness & nausea",
+      safetyScore: 84,
+      emoji: "🚢",
+      prices: {
+        "1mg":       { price: "₹38", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹46", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹36", url: "https://pharmeasy.in" }
+      }
+    }
+  ],
+  "Insomnia": [
+    {
+      name: "Melatonin 3mg",
+      use: "Natural sleep hormone — circadian rhythm regulation",
+      safetyScore: 98,
+      emoji: "😴",
+      prices: {
+        "1mg":       { price: "₹180", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹210", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹172", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Restyl 0.25mg (Alprazolam)",
+      use: "Benzodiazepine — short-term insomnia (Rx required)",
+      safetyScore: 74,
+      emoji: "⚠️",
+      prices: {
+        "1mg":       { price: "₹22", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹28", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹20", url: "https://pharmeasy.in" }
+      }
+    },
+    {
+      name: "Benadryl Nighttime",
+      use: "Diphenhydramine 25mg — mild OTC sleep aid",
+      safetyScore: 85,
+      emoji: "🌙",
+      prices: {
+        "1mg":       { price: "₹95", url: "https://www.1mg.com" },
+        "Apollo":    { price: "₹112", url: "https://www.apollopharmacy.in" },
+        "Pharmeasy": { price: "₹90", url: "https://pharmeasy.in" }
+      }
+    }
+  ]
+};
+
+/* ═══════════════════════════════════════════════════
+   HELPER: parse price string to number for comparison
+═══════════════════════════════════════════════════ */
+function parsePrice(priceStr) {
+  return parseInt(priceStr.replace(/[^\d]/g, ''), 10);
+}
+
+/* ═══════════════════════════════════════════════════
+   HELPER: SVG circular ring markup
+═══════════════════════════════════════════════════ */
+function buildRingSVG(score) {
+  const r = 34;
+  const circ = 2 * Math.PI * r; // ~213.6
+  const filled = circ * (score / 100);
+  const dashOffset = circ - filled;
+  // Safety color: green if ≥85, gold if 70-84, red below 70
+  const color = score >= 85 ? '#52B788' : score >= 70 ? '#E9C46A' : '#EF4444';
+
+  return `
+    <svg viewBox="0 0 80 80" width="80" height="80">
+      <circle class="ring-track" cx="40" cy="40" r="${r}" />
+      <circle class="ring-fill" cx="40" cy="40" r="${r}"
+        stroke="${color}"
+        stroke-dasharray="${circ}"
+        stroke-dashoffset="${dashOffset}"
+        transform="rotate(-90 40 40)" />
+      <text x="40" y="36" text-anchor="middle" dominant-baseline="middle"
+        font-family="DM Sans, sans-serif" font-size="11" font-weight="700" fill="${color}">
+        ${score}%
+      </text>
+      <text x="40" y="52" text-anchor="middle" dominant-baseline="middle"
+        font-family="DM Sans, sans-serif" font-size="8" fill="rgba(255,255,255,0.45)">
+        Safe
+      </text>
+    </svg>`;
+}
+
+/* ═══════════════════════════════════════════════════
+   MAIN RENDER FUNCTION
+═══════════════════════════════════════════════════ */
+function renderMedicines(symptom) {
+  const grid    = document.getElementById('medicineGrid');
+  const empty   = document.getElementById('emptyState');
+  const label   = document.getElementById('chosenLabel');
+  const labelTx = document.getElementById('chosenText');
+
+  if (!symptom) return;
+
+  // Show label
+  label.classList.remove('hidden');
+  labelTx.textContent = symptom;
+
+  // Hide empty state, show grid
+  empty.classList.add('hidden');
+  grid.classList.remove('hidden');
+  grid.innerHTML = '';
+
+  const medicines = MEDICINE_DB[symptom] || [];
+
+  medicines.forEach((med, idx) => {
+    // Determine cheapest provider
+    let cheapestKey = null;
+    let cheapestVal = Infinity;
+    Object.entries(med.prices).forEach(([provider, data]) => {
+      const val = parsePrice(data.price);
+      if (val < cheapestVal) { cheapestVal = val; cheapestKey = provider; }
+    });
+
+    // Build price rows HTML
+    const priceRows = Object.entries(med.prices).map(([provider, data]) => {
+      const isBest = provider === cheapestKey;
+      return `
+        <div class="price-row ${isBest ? 'bg-opacity-10' : ''}">
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-white font-medium">${provider}</span>
+            ${isBest ? '<span class="best-badge">Best Price</span>' : ''}
+          </div>
+          <span class="text-sm font-bold" style="color:${isBest ? '#E9C46A' : 'rgba(255,255,255,0.7)'}">
+            ${data.price}
+          </span>
+        </div>`;
+    }).join('');
+
+    const cheapestUrl = med.prices[cheapestKey].url;
+    const ringHTML    = buildRingSVG(med.safetyScore);
+
+    // Card HTML
+    const card = document.createElement('div');
+    card.className = 'medicine-card glass rounded-2xl p-5 flex flex-col gap-4';
+    card.style.animationDelay = `${idx * 90}ms`;
+
+    card.innerHTML = `
+      <!-- TOP ROW: emoji + name + use -->
+      <div class="flex items-start gap-3">
+        <div class="text-4xl flex-shrink-0 leading-none">${med.emoji}</div>
+        <div class="min-w-0">
+          <h3 class="font-serif text-lg font-bold text-white leading-tight">${med.name}</h3>
+          <p class="text-xs mt-1" style="color:rgba(255,255,255,0.5);line-height:1.5">${med.use}</p>
+        </div>
+      </div>
+
+      <!-- SAFETY SCORE WIDGET -->
+      <div class="flex items-center gap-4 rounded-xl p-3" style="background:rgba(0,0,0,0.2)">
+        <div class="flex-shrink-0">${ringHTML}</div>
+        <div>
+          <p class="section-label mb-1">Safety Score</p>
+          <p class="text-lg font-bold text-white">${med.safetyScore}% Safe</p>
+          <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.4)">
+            ${med.safetyScore >= 90 ? 'Clinically Approved · OTC' : med.safetyScore >= 75 ? 'Generally Safe · Follow dosage' : 'Prescription Required'}
+          </p>
+        </div>
+      </div>
+
+      <!-- PRICE COMPARISON TABLE -->
+      <div>
+        <p class="section-label mb-2">Price Comparison</p>
+        <div class="flex flex-col gap-1 rounded-xl overflow-hidden" style="background:rgba(0,0,0,0.15)">
+          ${priceRows}
+        </div>
+      </div>
+
+      <!-- BUY BUTTON -->
+      <a href="${cheapestUrl}" target="_blank" rel="noopener noreferrer" class="buy-btn">
+        Buy Now &nbsp;→
+      </a>`;
+
+    grid.appendChild(card);
+  });
+}
+</script>
+</body>
+</html>

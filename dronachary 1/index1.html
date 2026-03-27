@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In – The Clinical Boutique</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{'brand-orange':'#D94E1F','navy-deep':'#0A1628'},fontFamily:{sans:['Inter','system-ui','sans-serif']}}}}</script>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:'Inter',sans-serif}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+    @keyframes floatB{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-12px) rotate(10deg)}}
+    @keyframes spinDNA{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}
+    @keyframes orbitA{0%{transform:rotate(0deg) translateX(110px) rotate(0deg)}100%{transform:rotate(360deg) translateX(110px) rotate(-360deg)}}
+    @keyframes orbitB{0%{transform:rotate(120deg) translateX(145px) rotate(-120deg)}100%{transform:rotate(480deg) translateX(145px) rotate(-480deg)}}
+    @keyframes orbitC{0%{transform:rotate(240deg) translateX(175px) rotate(-240deg)}100%{transform:rotate(600deg) translateX(175px) rotate(-600deg)}}
+    @keyframes pulseDot{0%,100%{opacity:0.3}50%{opacity:0.9}}
+    @keyframes glow{0%,100%{opacity:0.15}50%{opacity:0.3}}
+    @keyframes fadeInUp{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+    .af{animation:float 6s ease-in-out infinite}
+    .afb{animation:floatB 8s ease-in-out infinite}
+    .ag{animation:glow 4s ease-in-out infinite}
+    .apd{animation:pulseDot 2.5s ease-in-out infinite}
+    .spinner{animation:spin 0.8s linear infinite}
+    .shake{animation:shake 0.5s ease}
+    input:focus{outline:none}
+    .inp:focus{border-color:#D94E1F!important;box-shadow:0 0 0 3px rgba(217,78,31,0.15)}
+    .custom-check{display:none}
+    .check-box{width:17px;height:17px;min-width:17px;border:1.5px solid #D1D5DB;border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s ease;background:#fff}
+    .custom-check:checked+.check-box{background:#D94E1F;border-color:#D94E1F}
+    .custom-check:checked+.check-box svg{display:block}
+    .check-box svg{display:none}
+    .btn-p{background:#D94E1F;transition:all 0.2s ease}
+    .btn-p:hover:not(:disabled){background:#B8401A;transform:translateY(-1px);box-shadow:0 8px 25px rgba(217,78,31,0.35)}
+    .btn-p:active:not(:disabled){transform:scale(0.98)}
+    .btn-p:disabled{opacity:0.75;cursor:not-allowed}
+    .btn-g{background:#fff;border:1.5px solid #E5E7EB;transition:all 0.2s ease}
+    .btn-g:hover{background:#F9FAFB;border-color:#D1D5DB}
+    .gt{background:linear-gradient(90deg,#D94E1F,#F97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    #rp{opacity:0}
+    #rp.loaded{animation:fadeInUp 0.6s ease 0.1s forwards}
+    .dl{flex:1;height:1px;background:#E5E7EB}
+    .hex-bg{opacity:0.07}
+    .err-box{display:none;align-items:center;gap:6px;color:#EF4444;font-size:12px;background:rgba(239,68,68,0.08);padding:10px 14px;border-radius:8px;border-left:3px solid #EF4444;margin-bottom:16px}
+    .forgot-hint{display:none;color:#EF4444;font-size:11px;margin-top:4px}
+    @media(max-width:1023px){#lp{min-height:160px;height:160px}}
+    @media(min-width:1024px){#lp{height:100vh;width:60%}#rp{width:40%;min-height:100vh}}
+  </style>
+</head>
+<body class="bg-navy-deep overflow-x-hidden">
+<div class="flex flex-col lg:flex-row min-h-screen w-full">
+
+  <!-- LEFT PANEL -->
+  <div id="lp" class="relative flex flex-col justify-end overflow-hidden order-2 lg:order-1"
+    style="background:linear-gradient(135deg,#0A1628 0%,#0D1F3C 50%,#1A3A6B 100%);">
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+      <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" class="w-full h-full max-w-2xl mx-auto opacity-90" style="position:absolute;inset:0">
+        <defs>
+          <pattern id="hex" x="0" y="0" width="60" height="52" patternUnits="userSpaceOnUse"><polygon points="30,2 58,16 58,36 30,50 2,36 2,16" fill="none" stroke="#60A5FA" stroke-width="0.8"/></pattern>
+          <radialGradient id="og" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#1A3A6B" stop-opacity="0.7"/><stop offset="100%" stop-color="#0A1628" stop-opacity="0"/></radialGradient>
+          <filter id="gf"><feGaussianBlur stdDeviation="22"/></filter>
+        </defs>
+        <rect width="600" height="600" fill="url(#hex)" class="hex-bg"/>
+        <circle cx="300" cy="300" r="200" fill="url(#og)" filter="url(#gf)" class="ag"/>
+        <circle cx="300" cy="300" r="170" fill="#1A3A6B" fill-opacity="0.12"/>
+        <circle cx="300" cy="300" r="110" fill="none" stroke="#60A5FA" stroke-width="0.8" stroke-opacity="0.3" stroke-dasharray="4 8"/>
+        <circle cx="300" cy="300" r="145" fill="none" stroke="#F97316" stroke-width="0.6" stroke-opacity="0.25" stroke-dasharray="3 10"/>
+        <circle cx="300" cy="300" r="175" fill="none" stroke="#93C5FD" stroke-width="0.5" stroke-opacity="0.2" stroke-dasharray="2 12"/>
+        <g style="transform-origin:300px 300px"><circle cx="300" cy="300" r="7" fill="#60A5FA" fill-opacity="0.85" style="transform-origin:300px 300px;animation:orbitA 12s linear infinite"/></g>
+        <g style="transform-origin:300px 300px"><circle cx="300" cy="300" r="5" fill="#F97316" fill-opacity="0.9" style="transform-origin:300px 300px;animation:orbitB 18s linear infinite"/></g>
+        <g style="transform-origin:300px 300px"><circle cx="300" cy="300" r="4" fill="#FFF" fill-opacity="0.7" style="transform-origin:300px 300px;animation:orbitC 25s linear infinite"/></g>
+        <g transform="translate(276,276)"><rect x="18" y="0" width="12" height="48" rx="4" fill="#FFF" fill-opacity="0.95"/><rect x="0" y="18" width="48" height="12" rx="4" fill="#FFF" fill-opacity="0.95"/></g>
+        <g style="transform-origin:300px 165px;animation:spinDNA 8s linear infinite">
+          <path d="M265,90 C245,110 255,130 265,150 C275,170 245,190 265,210 C285,230 245,250 265,270" fill="none" stroke="#60A5FA" stroke-width="2.5" stroke-opacity="0.8" stroke-linecap="round"/>
+          <path d="M335,90 C355,110 345,130 335,150 C325,170 355,190 335,210 C315,230 355,250 335,270" fill="none" stroke="#F97316" stroke-width="2.5" stroke-opacity="0.8" stroke-linecap="round"/>
+          <line x1="265" y1="105" x2="335" y2="105" stroke="#FFF" stroke-width="1.5" stroke-opacity="0.5"/>
+          <line x1="261" y1="138" x2="339" y2="138" stroke="#FFF" stroke-width="1.5" stroke-opacity="0.5"/>
+          <line x1="258" y1="174" x2="342" y2="174" stroke="#FFF" stroke-width="1.5" stroke-opacity="0.45"/>
+          <line x1="261" y1="210" x2="339" y2="210" stroke="#FFF" stroke-width="1.5" stroke-opacity="0.5"/>
+          <line x1="265" y1="246" x2="335" y2="246" stroke="#FFF" stroke-width="1.5" stroke-opacity="0.45"/>
+          <circle cx="265" cy="105" r="4" fill="#60A5FA" fill-opacity="0.9"/><circle cx="335" cy="105" r="4" fill="#F97316" fill-opacity="0.9"/>
+          <circle cx="265" cy="150" r="4" fill="#60A5FA" fill-opacity="0.9"/><circle cx="335" cy="150" r="4" fill="#F97316" fill-opacity="0.9"/>
+          <circle cx="265" cy="195" r="4" fill="#60A5FA" fill-opacity="0.9"/><circle cx="335" cy="195" r="4" fill="#F97316" fill-opacity="0.9"/>
+          <circle cx="265" cy="240" r="4" fill="#60A5FA" fill-opacity="0.9"/><circle cx="335" cy="240" r="4" fill="#F97316" fill-opacity="0.9"/>
+        </g>
+        <circle cx="80" cy="120" r="3" fill="#60A5FA" class="apd" style="animation-delay:0s"/>
+        <circle cx="520" cy="80" r="4" fill="#F97316" class="apd" style="animation-delay:0.8s"/>
+        <circle cx="140" cy="450" r="2.5" fill="#FFF" class="apd" style="animation-delay:1.4s"/>
+        <circle cx="490" cy="420" r="3.5" fill="#60A5FA" class="apd" style="animation-delay:0.4s"/>
+        <circle cx="60" cy="300" r="2" fill="#F97316" class="apd" style="animation-delay:2s"/>
+        <circle cx="540" cy="300" r="2.5" fill="#FFF" class="apd" style="animation-delay:1.2s"/>
+        <circle cx="200" cy="80" r="3" fill="#93C5FD" class="apd" style="animation-delay:0.6s"/>
+        <circle cx="420" cy="500" r="3" fill="#FDBA74" class="apd" style="animation-delay:1.8s"/>
+        <g transform="translate(440,390)" class="afb"><rect x="8" y="0" width="5" height="21" rx="2" fill="#F97316" fill-opacity="0.5"/><rect x="0" y="8" width="21" height="5" rx="2" fill="#F97316" fill-opacity="0.5"/></g>
+        <g transform="translate(90,180)" class="af"><rect x="0" y="0" width="36" height="14" rx="7" fill="#60A5FA" fill-opacity="0.2" stroke="#60A5FA" stroke-width="0.8" stroke-opacity="0.5"/></g>
+      </svg>
+    </div>
+    <div class="relative z-10 p-8 lg:p-12 pb-12 lg:pb-16 hidden lg:flex flex-col gap-6">
+      <div class="inline-flex items-center gap-2 self-start px-4 py-2 rounded-full" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12)">
+        <span style="width:7px;height:7px;background:#D94E1F;border-radius:50%;display:inline-block;box-shadow:0 0 8px #D94E1F"></span>
+        <span style="color:#E2E8F0;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase">✦ AI-Powered Healthcare Platform</span>
+      </div>
+      <h1 style="font-size:clamp(38px,4vw,56px);font-weight:800;color:#FFF;line-height:1.1;margin:0">Your Health,<br/><span class="gt">AI-Powered.</span></h1>
+      <p style="font-size:16px;color:#CBD5E1;max-width:400px;line-height:1.75;margin:0">Intelligent diagnostics, personalized care pathways, and real-time health insights — all in one platform.</p>
+      <div class="flex flex-wrap gap-3 mt-2">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full" style="border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v6c0 5.25 3.75 10.15 9 11.25C17.25 23.15 21 18.25 21 13V7l-9-5z" fill="#60A5FA" fill-opacity="0.9"/></svg><span style="font-size:11px;color:#E2E8F0;font-weight:500">HIPAA Compliant</span></div>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full" style="border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M13 2L4.09 12.96A1 1 0 005 14.5h5.5L11 22l8.91-10.96A1 1 0 0019 9.5h-5.5L13 2z" fill="#FBBF24"/></svg><span style="font-size:11px;color:#E2E8F0;font-weight:500">Real-Time AI</span></div>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full" style="border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" fill="#34D399"/><path d="M8 11V7a4 4 0 118 0v4" stroke="#34D399" stroke-width="2" stroke-linecap="round" fill="none"/></svg><span style="font-size:11px;color:#E2E8F0;font-weight:500">256-bit Encrypted</span></div>
+      </div>
+    </div>
+    <div class="lg:hidden flex items-center justify-center gap-3 py-5 relative z-10">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="10" y="2" width="4" height="20" rx="2" fill="#D94E1F"/><rect x="2" y="10" width="20" height="4" rx="2" fill="#D94E1F"/></svg>
+      <span style="font-size:16px;font-weight:700;color:#fff">The <span style="color:#D94E1F">Clinical Boutique</span></span>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="rp" class="order-1 lg:order-2 flex flex-col items-center justify-center bg-white" style="padding:48px 24px;min-height:100vh">
+    <div class="right-panel-form" style="width:100%;max-width:380px;margin:0 auto">
+      <!-- Logo -->
+      <div class="flex flex-col items-start gap-3 mb-8">
+        <div class="flex items-center gap-2.5">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="10" y="2" width="4" height="20" rx="2" fill="#D94E1F"/><rect x="2" y="10" width="20" height="4" rx="2" fill="#D94E1F"/></svg>
+          <div style="font-size:17px;line-height:1"><span style="font-weight:300;color:#9CA3AF">The&nbsp;</span><span style="font-weight:700;color:#0A1628">Clinical&nbsp;</span><span style="font-weight:700;color:#D94E1F">Boutique</span></div>
+        </div>
+        <div style="height:1px;width:100%;background:#E5E7EB"></div>
+      </div>
+      <!-- Header -->
+      <div class="mb-7">
+        <h2 style="font-size:28px;font-weight:700;color:#0A1628;margin:0 0 6px 0">Welcome Back</h2>
+        <p style="font-size:14px;color:#9CA3AF;margin:0">Sign in to your clinical dashboard</p>
+      </div>
+      <form id="loginForm" onsubmit="return false" novalidate autocomplete="off">
+        <div id="loginError" class="err-box" role="alert"></div>
+        <!-- Email -->
+        <div class="mb-5">
+          <label for="emailInput" style="display:block;font-size:11px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px">Email Address</label>
+          <div style="position:relative">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;display:flex">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="3" stroke="#9CA3AF" stroke-width="1.8" fill="none"/><path d="M2 7l10 7 10-7" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+            </span>
+            <input type="email" id="emailInput" class="inp" placeholder="doctor@clinicalboutique.com" autocomplete="email"
+              style="width:100%;height:48px;padding:0 14px 0 44px;border:1.5px solid #E5E7EB;border-radius:12px;font-size:14px;color:#374151;font-family:inherit;transition:border-color 0.2s,box-shadow 0.2s;background:#fff"/>
+          </div>
+        </div>
+        <!-- Password -->
+        <div class="mb-4">
+          <label for="passwordInput" style="display:block;font-size:11px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px">Password</label>
+          <div style="position:relative">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;display:flex">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="#9CA3AF" stroke-width="1.8" fill="none"/><path d="M8 11V7.5a4 4 0 118 0V11" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+            </span>
+            <input type="password" id="passwordInput" placeholder="••••••••••" autocomplete="current-password" class="inp"
+              style="width:100%;height:48px;padding:0 46px 0 44px;border:1.5px solid #E5E7EB;border-radius:12px;font-size:15px;color:#374151;font-family:inherit;transition:border-color 0.2s,box-shadow 0.2s;background:#fff"/>
+            <button type="button" onclick="togglePwd()" aria-label="Toggle password visibility"
+              style="position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;color:#9CA3AF">
+              <svg id="eo" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>
+              <svg id="ec" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <!-- Utility row -->
+        <div class="flex items-start justify-between mb-6" style="gap:8px">
+          <label class="flex items-center gap-2 cursor-pointer select-none" for="rememberCheck">
+            <input type="checkbox" id="rememberCheck" class="custom-check"/>
+            <span class="check-box" onclick="document.getElementById('rememberCheck').click();event.preventDefault()">
+              <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span style="font-size:13px;color:#374151">Remember me for 30 days</span>
+          </label>
+          <div style="text-align:right">
+            <a href="#" onclick="showForgotHint(event)" style="font-size:13px;color:#D94E1F;text-decoration:none;white-space:nowrap;font-weight:500">Forgot Password?</a>
+            <p id="forgotHint" class="forgot-hint">Password reset unavailable. Please contact admin.</p>
+          </div>
+        </div>
+        <!-- CTA -->
+        <button type="button" id="loginBtn" onclick="handleLogin()" class="btn-p"
+          style="width:100%;height:52px;border-radius:12px;border:none;color:#fff;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px">
+          <span id="lbText">Sign In</span>
+          <svg id="lbArrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg id="lbSpin" width="20" height="20" viewBox="0 0 24 24" fill="none" class="spinner" style="display:none"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none"/><path d="M12 2a10 10 0 0110 10" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+        </button>
+        <!-- Divider -->
+        <div class="flex items-center gap-3 mb-5">
+          <div class="dl"></div><span style="font-size:12px;color:#9CA3AF;white-space:nowrap">— or continue with —</span><div class="dl"></div>
+        </div>
+        <!-- Google -->
+        <button type="button" onclick="window.location.href='signup.html'" class="btn-g"
+          style="width:100%;height:48px;border-radius:12px;font-size:15px;font-weight:500;font-family:inherit;color:#374151;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px">
+          <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.9 3 4 11.9 4 23s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.2-2.7-.5-4z"/><path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 17 19.3 14 24 14c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 16.3 3 9.6 7.9 6.3 14.7z"/><path fill="#FBBC05" d="M24 43c5.4 0 10.2-1.8 14-5l-6.5-5.3C29.6 34.5 26.9 35.5 24 35.5c-6 0-11-4-12.9-9.6l-7 5.4C7.6 38.9 15.1 43 24 43z"/><path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-1 3-3.2 5.5-6.3 7l6.5 5.3C40.6 36.9 44.5 30.5 44.5 23c0-1-.1-2-.5-3z"/></svg>
+          Sign up with Google
+        </button>
+        <!-- Footer -->
+        <p style="text-align:center;font-size:14px;color:#9CA3AF;margin:0">
+          Don't have an account?&nbsp;
+          <a href="signup.html" style="color:#D94E1F;font-weight:600;text-decoration:none"
+             onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Request Access →</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(()=>document.getElementById('rp').classList.add('loaded')));
+
+  function togglePwd(){
+    const i=document.getElementById('passwordInput'),eo=document.getElementById('eo'),ec=document.getElementById('ec');
+    if(i.type==='password'){i.type='text';eo.style.display='none';ec.style.display='block';}
+    else{i.type='password';eo.style.display='block';ec.style.display='none';}
+  }
+
+  function showForgotHint(e){
+    e.preventDefault();
+    const h=document.getElementById('forgotHint');
+    h.style.display=h.style.display==='block'?'none':'block';
+  }
+
+  function showLoginError(message){
+    const el=document.getElementById('loginError');
+    el.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${message}`;
+    el.style.display='flex';el.style.alignItems='center';el.style.gap='6px';
+  }
+
+  function handleLogin(){
+    const email=document.getElementById('emailInput').value.trim();
+    const password=document.getElementById('passwordInput').value.trim();
+    const errorEl=document.getElementById('loginError');
+    errorEl.style.display='none';errorEl.textContent='';
+
+    if(!email||!password){showLoginError('Please fill in all fields.');return;}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showLoginError('Please enter a valid email address.');return;}
+
+    const stored=localStorage.getItem('registeredUser');
+    if(!stored){showLoginError('No account found. Please sign up first.');return;}
+
+    const user=JSON.parse(stored);
+    if(user.email.toLowerCase()===email.toLowerCase()&&user.password===password){
+      sessionStorage.setItem('activeUser',user.name);
+      sessionStorage.setItem('activeEmail',user.email);
+      const btn=document.getElementById('loginBtn');
+      document.getElementById('lbText').textContent='Signing in...';
+      document.getElementById('lbArrow').style.display='none';
+      document.getElementById('lbSpin').style.display='block';
+      btn.disabled=true;
+      setTimeout(()=>{window.location.href='dashboard.html';},1200);
+    } else {
+      showLoginError('Invalid email or password. Please try again.');
+      const form=document.querySelector('.right-panel-form');
+      form.classList.add('shake');
+      setTimeout(()=>form.classList.remove('shake'),500);
+    }
+  }
+
+  document.addEventListener('keydown',e=>{if(e.key==='Enter')handleLogin();});
+  document.getElementById('emailInput').addEventListener('input',()=>{document.getElementById('loginError').style.display='none';});
+  document.getElementById('passwordInput').addEventListener('input',()=>{document.getElementById('loginError').style.display='none';});
+</script>
+</body>
+</html>

@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In – The Clinical Boutique</title>
+  <meta name="description" content="Sign in to The Clinical Boutique's AI-powered clinical dashboard." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-orange': '#D94E1F',
+            'brand-orange-dark': '#B8401A',
+            'brand-orange-light': '#F97316',
+            'navy-deep': '#0A1628',
+            'navy-mid': '#0D1F3C',
+            'navy-accent': '#1A3A6B',
+            'surface': '#FFFFFF',
+            'body-text': '#374151',
+            'muted-text': '#9CA3AF',
+            'border-color': '#E5E7EB',
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            'xl': '12px',
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'spin-slow': 'spin 8s linear infinite',
+            'pulse-slow': 'pulse 3s ease-in-out infinite',
+            'fadeInUp': 'fadeInUp 0.6s ease forwards',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; }
+
+    /* ── Animations ── */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-18px); }
+    }
+    @keyframes floatB {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(10deg); }
+    }
+    @keyframes spinDNA {
+      0%   { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+    @keyframes orbitA {
+      0%   { transform: rotate(0deg) translateX(110px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(110px) rotate(-360deg); }
+    }
+    @keyframes orbitB {
+      0%   { transform: rotate(120deg) translateX(145px) rotate(-120deg); }
+      100% { transform: rotate(480deg) translateX(145px) rotate(-480deg); }
+    }
+    @keyframes orbitC {
+      0%   { transform: rotate(240deg) translateX(175px) rotate(-240deg); }
+      100% { transform: rotate(600deg) translateX(175px) rotate(-600deg); }
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.3; r: 3; }
+      50% { opacity: 0.9; r: 5; }
+    }
+    @keyframes glow {
+      0%, 100% { opacity: 0.15; }
+      50% { opacity: 0.3; }
+    }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spinRing {
+      from { stroke-dashoffset: 0; }
+      to   { stroke-dashoffset: -600; }
+    }
+
+    .animate-float { animation: float 6s ease-in-out infinite; }
+    .animate-float-b { animation: floatB 8s ease-in-out infinite; }
+    .animate-orbit-a { animation: orbitA 12s linear infinite; }
+    .animate-orbit-b { animation: orbitB 18s linear infinite; }
+    .animate-orbit-c { animation: orbitC 25s linear infinite; }
+    .animate-spin-dna { animation: spinDNA 8s linear infinite; }
+    .animate-glow { animation: glow 4s ease-in-out infinite; }
+    .animate-pulse-dot { animation: pulseDot 2.5s ease-in-out infinite; }
+    .animate-ring { animation: spinRing 8s linear infinite; }
+
+    /* ── Custom focus ring ── */
+    input:focus { outline: none; }
+    .input-field:focus {
+      border-color: #D94E1F !important;
+      box-shadow: 0 0 0 3px rgba(217, 78, 31, 0.15);
+    }
+
+    /* ── Custom checkbox ── */
+    .custom-check { display: none; }
+    .check-box {
+      width: 17px; height: 17px; min-width: 17px;
+      border: 1.5px solid #D1D5DB; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s ease;
+      background: #fff;
+    }
+    .custom-check:checked + .check-box {
+      background: #D94E1F; border-color: #D94E1F;
+    }
+    .custom-check:checked + .check-box svg { display: block; }
+    .check-box svg { display: none; }
+
+    /* ── CTA Button ── */
+    .btn-primary {
+      background: #D94E1F;
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #B8401A;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(217, 78, 31, 0.35);
+    }
+    .btn-primary:active:not(:disabled) { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.75; cursor: not-allowed; }
+
+    /* ── Google Button ── */
+    .btn-google {
+      background: #fff; border: 1.5px solid #E5E7EB;
+      transition: all 0.2s ease;
+    }
+    .btn-google:hover {
+      background: #F9FAFB; border-color: #D1D5DB;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    /* ── Error message ── */
+    .field-error {
+      color: #EF4444; font-size: 12px; margin-top: 5px;
+      opacity: 0; transform: translateY(-4px);
+      transition: all 0.25s ease;
+      height: 0; overflow: hidden;
+    }
+    .field-error.visible {
+      opacity: 1; transform: translateY(0); height: auto;
+    }
+
+    /* ── Gradient text ── */
+    .gradient-text {
+      background: linear-gradient(90deg, #D94E1F, #F97316);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Right panel fade-in ── */
+    #rightPanel { opacity: 0; }
+    #rightPanel.loaded { animation: fadeInUp 0.6s ease 0.1s forwards; }
+
+    /* ── Spinner ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { animation: spin 0.8s linear infinite; }
+
+    /* ── Divider ── */
+    .divider-line {
+      flex: 1; height: 1px; background: #E5E7EB;
+    }
+
+    /* ── Hexagon texture ── */
+    .hex-bg { opacity: 0.07; }
+
+    /* ── Mobile banner ── */
+    @media (max-width: 1023px) {
+      #leftPanel { min-height: 160px; height: 160px; }
+    }
+    @media (min-width: 1024px) {
+      #leftPanel { height: 100vh; width: 60%; }
+      #rightPanel { width: 40%; min-height: 100vh; }
+    }
+  </style>
+</head>
+<body class="bg-navy-deep overflow-x-hidden">
+
+<div class="flex flex-col lg:flex-row min-h-screen w-full">
+
+  <!-- ════════════════════════════════════════════
+       LEFT PANEL — Brand + Illustration
+  ════════════════════════════════════════════ -->
+  <div id="leftPanel"
+    class="relative flex flex-col justify-end overflow-hidden order-2 lg:order-1"
+    style="background: linear-gradient(135deg, #0A1628 0%, #0D1F3C 50%, #1A3A6B 100%);">
+
+    <!-- ── SVG Illustration ── -->
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+      <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg"
+           class="w-full h-full max-w-2xl mx-auto opacity-90" style="position:absolute;inset:0;">
+
+        <!-- Honeycomb / hex grid background texture -->
+        <defs>
+          <pattern id="hex" x="0" y="0" width="60" height="52" patternUnits="userSpaceOnUse">
+            <polygon points="30,2 58,16 58,36 30,50 2,36 2,16"
+              fill="none" stroke="#60A5FA" stroke-width="0.8"/>
+          </pattern>
+          <radialGradient id="orbGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#1A3A6B" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="#0A1628" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="gf">
+            <feGaussianBlur stdDeviation="22"/>
+          </filter>
+          <radialGradient id="dotGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#F97316" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#F97316" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Hex texture -->
+        <rect width="600" height="600" fill="url(#hex)" class="hex-bg"/>
+
+        <!-- Glowing orb backdrop -->
+        <circle cx="300" cy="300" r="200" fill="url(#orbGrad)" filter="url(#gf)" class="animate-glow"/>
+        <circle cx="300" cy="300" r="170" fill="#1A3A6B" fill-opacity="0.12"/>
+
+        <!-- Orbit rings -->
+        <circle cx="300" cy="300" r="110" fill="none" stroke="#60A5FA" stroke-width="0.8" stroke-opacity="0.3" stroke-dasharray="4 8"/>
+        <circle cx="300" cy="300" r="145" fill="none" stroke="#F97316" stroke-width="0.6" stroke-opacity="0.25" stroke-dasharray="3 10"/>
+        <circle cx="300" cy="300" r="175" fill="none" stroke="#93C5FD" stroke-width="0.5" stroke-opacity="0.2" stroke-dasharray="2 12"/>
+
+        <!-- Orbiting node A -->
+        <g style="transform-origin:300px 300px">
+          <circle cx="300" cy="300" r="7" fill="#60A5FA" fill-opacity="0.85"
+            style="transform-origin:300px 300px; animation: orbitA 12s linear infinite;"/>
+        </g>
+        <!-- Orbiting node B -->
+        <g style="transform-origin:300px 300px">
+          <circle cx="300" cy="300" r="5" fill="#F97316" fill-opacity="0.9"
+            style="transform-origin:300px 300px; animation: orbitB 18s linear infinite;"/>
+        </g>
+        <!-- Orbiting node C -->
+        <g style="transform-origin:300px 300px">
+          <circle cx="300" cy="300" r="4" fill="#FFFFFF" fill-opacity="0.7"
+            style="transform-origin:300px 300px; animation: orbitC 25s linear infinite;"/>
+        </g>
+
+        <!-- Medical cross (center) -->
+        <g transform="translate(276, 276)">
+          <rect x="18" y="0" width="12" height="48" rx="4" fill="#FFFFFF" fill-opacity="0.95"/>
+          <rect x="0" y="18" width="48" height="12" rx="4" fill="#FFFFFF" fill-opacity="0.95"/>
+          <!-- subtle glow behind cross -->
+          <rect x="18" y="0" width="12" height="48" rx="4" fill="#60A5FA" fill-opacity="0.3" filter="url(#gf)"/>
+        </g>
+
+        <!-- DNA double helix (animated, perspective) -->
+        <g style="transform-origin:300px 165px; animation: spinDNA 8s linear infinite;">
+          <!-- Backbone left -->
+          <path d="M265,90 C245,110 255,130 265,150 C275,170 245,190 265,210 C285,230 245,250 265,270"
+            fill="none" stroke="#60A5FA" stroke-width="2.5" stroke-opacity="0.8" stroke-linecap="round"/>
+          <!-- Backbone right -->
+          <path d="M335,90 C355,110 345,130 335,150 C325,170 355,190 335,210 C315,230 355,250 335,270"
+            fill="none" stroke="#F97316" stroke-width="2.5" stroke-opacity="0.8" stroke-linecap="round"/>
+          <!-- Rungs -->
+          <line x1="265" y1="105" x2="335" y2="105" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.5"/>
+          <line x1="270" y1="120" x2="330" y2="120" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.4"/>
+          <line x1="261" y1="138" x2="339" y2="138" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.5"/>
+          <line x1="268" y1="156" x2="332" y2="156" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.4"/>
+          <line x1="258" y1="174" x2="342" y2="174" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.45"/>
+          <line x1="265" y1="192" x2="335" y2="192" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.4"/>
+          <line x1="261" y1="210" x2="339" y2="210" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.5"/>
+          <line x1="268" y1="228" x2="332" y2="228" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.4"/>
+          <line x1="265" y1="246" x2="335" y2="246" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.45"/>
+          <line x1="262" y1="262" x2="338" y2="262" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.4"/>
+          <!-- Node dots -->
+          <circle cx="265" cy="105" r="4" fill="#60A5FA" fill-opacity="0.9"/>
+          <circle cx="335" cy="105" r="4" fill="#F97316" fill-opacity="0.9"/>
+          <circle cx="265" cy="150" r="4" fill="#60A5FA" fill-opacity="0.9"/>
+          <circle cx="335" cy="150" r="4" fill="#F97316" fill-opacity="0.9"/>
+          <circle cx="265" cy="195" r="4" fill="#60A5FA" fill-opacity="0.9"/>
+          <circle cx="335" cy="195" r="4" fill="#F97316" fill-opacity="0.9"/>
+          <circle cx="265" cy="240" r="4" fill="#60A5FA" fill-opacity="0.9"/>
+          <circle cx="335" cy="240" r="4" fill="#F97316" fill-opacity="0.9"/>
+        </g>
+
+        <!-- Floating particles -->
+        <circle cx="80" cy="120" r="3" fill="#60A5FA" class="animate-pulse-dot" style="animation-delay:0s"/>
+        <circle cx="520" cy="80" r="4" fill="#F97316" class="animate-pulse-dot" style="animation-delay:0.8s"/>
+        <circle cx="140" cy="450" r="2.5" fill="#FFFFFF" class="animate-pulse-dot" style="animation-delay:1.4s"/>
+        <circle cx="490" cy="420" r="3.5" fill="#60A5FA" class="animate-pulse-dot" style="animation-delay:0.4s"/>
+        <circle cx="60" cy="300" r="2" fill="#F97316" class="animate-pulse-dot" style="animation-delay:2s"/>
+        <circle cx="540" cy="300" r="2.5" fill="#FFFFFF" class="animate-pulse-dot" style="animation-delay:1.2s"/>
+        <circle cx="200" cy="80" r="3" fill="#93C5FD" class="animate-pulse-dot" style="animation-delay:0.6s"/>
+        <circle cx="420" cy="500" r="3" fill="#FDBA74" class="animate-pulse-dot" style="animation-delay:1.8s"/>
+        <circle cx="520" cy="480" r="2" fill="#60A5FA" class="animate-pulse-dot" style="animation-delay:2.5s"/>
+        <circle cx="100" cy="500" r="2.5" fill="#F97316" class="animate-pulse-dot" style="animation-delay:3s"/>
+
+        <!-- Floating secondary element: small cross bottom-right -->
+        <g transform="translate(440,390)" class="animate-float-b">
+          <rect x="8" y="0" width="5" height="21" rx="2" fill="#F97316" fill-opacity="0.5"/>
+          <rect x="0" y="8" width="21" height="5" rx="2" fill="#F97316" fill-opacity="0.5"/>
+        </g>
+        <!-- Floating pill top-left -->
+        <g transform="translate(90,180)" class="animate-float">
+          <rect x="0" y="0" width="36" height="14" rx="7" fill="#60A5FA" fill-opacity="0.2" stroke="#60A5FA" stroke-width="0.8" stroke-opacity="0.5"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- ── Text Content (bottom-left) ── -->
+    <div class="relative z-10 p-8 lg:p-12 pb-12 lg:pb-16 hidden lg:flex flex-col gap-6">
+
+      <!-- AI Badge -->
+      <div class="inline-flex items-center gap-2 self-start px-4 py-2 rounded-full"
+           style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(8px);">
+        <span style="width:7px;height:7px;background:#D94E1F;border-radius:50%;display:inline-block;box-shadow:0 0 8px #D94E1F;"></span>
+        <span style="color:#E2E8F0;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;">✦ AI-Powered Healthcare Platform</span>
+      </div>
+
+      <!-- Heading -->
+      <h1 style="font-size:clamp(38px,4vw,56px);font-weight:800;color:#FFFFFF;line-height:1.1;margin:0;">
+        Your Health,<br/>
+        <span class="gradient-text">AI-Powered.</span>
+      </h1>
+
+      <!-- Subtext -->
+      <p style="font-size:16px;color:#CBD5E1;max-width:400px;line-height:1.75;margin:0;">
+        Intelligent diagnostics, personalized care pathways,
+        and real-time health insights — all in one platform.
+      </p>
+
+      <!-- Trust badges -->
+      <div class="flex flex-wrap gap-3 mt-2">
+        <!-- HIPAA -->
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full"
+             style="border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 7v6c0 5.25 3.75 10.15 9 11.25C17.25 23.15 21 18.25 21 13V7l-9-5z" fill="#60A5FA" fill-opacity="0.9"/>
+          </svg>
+          <span style="font-size:11px;color:#E2E8F0;font-weight:500;white-space:nowrap;">HIPAA Compliant</span>
+        </div>
+        <!-- Real-time AI -->
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full"
+             style="border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L4.09 12.96A1 1 0 005 14.5h5.5L11 22l8.91-10.96A1 1 0 0019 9.5h-5.5L13 2z" fill="#FBBF24"/>
+          </svg>
+          <span style="font-size:11px;color:#E2E8F0;font-weight:500;white-space:nowrap;">Real-Time AI</span>
+        </div>
+        <!-- Encrypted -->
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full"
+             style="border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="5" y="11" width="14" height="10" rx="2" fill="#34D399"/>
+            <path d="M8 11V7a4 4 0 118 0v4" stroke="#34D399" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+          <span style="font-size:11px;color:#E2E8F0;font-weight:500;white-space:nowrap;">256-bit Encrypted</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile minimal brand bar -->
+    <div class="lg:hidden flex items-center justify-center gap-3 py-5 relative z-10">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="2" width="4" height="20" rx="2" fill="#D94E1F"/>
+        <rect x="2" y="10" width="20" height="4" rx="2" fill="#D94E1F"/>
+      </svg>
+      <span style="font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.01em;">
+        The <span style="color:#D94E1F;">Clinical Boutique</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       RIGHT PANEL — Login Form
+  ════════════════════════════════════════════ -->
+  <div id="rightPanel"
+    class="order-1 lg:order-2 flex flex-col items-center justify-center bg-white"
+    style="padding: 48px 24px; min-height: 100vh;">
+
+    <div style="width:100%;max-width:380px;margin:0 auto;">
+
+      <!-- ── Logo ── -->
+      <div class="flex flex-col items-start gap-3 mb-8">
+        <div class="flex items-center gap-2.5">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="10" y="2" width="4" height="20" rx="2" fill="#D94E1F"/>
+            <rect x="2" y="10" width="20" height="4" rx="2" fill="#D94E1F"/>
+          </svg>
+          <div style="font-size:17px;line-height:1;">
+            <span style="font-weight:300;color:#9CA3AF;">The&nbsp;</span><span style="font-weight:700;color:#0A1628;">Clinical&nbsp;</span><span style="font-weight:700;color:#D94E1F;">Boutique</span>
+          </div>
+        </div>
+        <div style="height:1px;width:100%;background:#E5E7EB;"></div>
+      </div>
+
+      <!-- ── Header ── -->
+      <div class="mb-7">
+        <h2 style="font-size:28px;font-weight:700;color:#0A1628;margin:0 0 6px 0;">Welcome Back</h2>
+        <p style="font-size:14px;color:#9CA3AF;margin:0;">Sign in to your clinical dashboard</p>
+      </div>
+
+      <!-- ── Form ── -->
+      <form id="loginForm" onsubmit="return false;" novalidate autocomplete="off">
+
+        <!-- Email Field -->
+        <div class="mb-5">
+          <label for="emailInput" style="display:block;font-size:11px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;">
+            Email Address
+          </label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;display:flex;align-items:center;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="4" width="20" height="16" rx="3" stroke="#9CA3AF" stroke-width="1.8" fill="none"/>
+                <path d="M2 7l10 7 10-7" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+              </svg>
+            </span>
+            <input
+              type="email"
+              id="emailInput"
+              class="input-field"
+              placeholder="doctor@clinicalboutique.com"
+              autocomplete="email"
+              style="width:100%;height:48px;padding:0 14px 0 44px;border:1.5px solid #E5E7EB;border-radius:12px;font-size:14px;color:#374151;font-family:inherit;transition:border-color 0.2s,box-shadow 0.2s;background:#fff;"
+            />
+          </div>
+          <p id="emailError" class="field-error">Please enter a valid email address.</p>
+        </div>
+
+        <!-- Password Field -->
+        <div class="mb-5">
+          <label for="passwordInput" style="display:block;font-size:11px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;">
+            Password
+          </label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;display:flex;align-items:center;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="5" y="11" width="14" height="10" rx="2" stroke="#9CA3AF" stroke-width="1.8" fill="none"/>
+                <path d="M8 11V7.5a4 4 0 118 0V11" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+              </svg>
+            </span>
+            <input
+              type="password"
+              id="passwordInput"
+              placeholder="••••••••••"
+              autocomplete="current-password"
+              style="width:100%;height:48px;padding:0 46px 0 44px;border:1.5px solid #E5E7EB;border-radius:12px;font-size:15px;color:#374151;font-family:inherit;transition:border-color 0.2s,box-shadow 0.2s;background:#fff;"
+              class="input-field"
+            />
+            <button
+              type="button"
+              id="togglePwdBtn"
+              onclick="togglePassword()"
+              aria-label="Toggle password visibility"
+              style="position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;color:#9CA3AF;">
+              <!-- Eye open icon -->
+              <svg id="eyeOpen" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/>
+              </svg>
+              <!-- Eye off icon -->
+              <svg id="eyeClosed" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <p id="passwordError" class="field-error">Password cannot be empty.</p>
+        </div>
+
+        <!-- Utility row -->
+        <div class="flex items-center justify-between mb-6" style="gap:8px;">
+          <label class="flex items-center gap-2 cursor-pointer select-none" for="rememberCheck">
+            <input type="checkbox" id="rememberCheck" class="custom-check" />
+            <span class="check-box" onclick="document.getElementById('rememberCheck').click();event.preventDefault();">
+              <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span style="font-size:13px;color:#374151;">Remember me for 30 days</span>
+          </label>
+          <a href="#" style="font-size:13px;color:#D94E1F;text-decoration:none;white-space:nowrap;font-weight:500;"
+             onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+            Forgot Password?
+          </a>
+        </div>
+
+        <!-- Sign In Button -->
+        <button
+          type="button"
+          id="signInBtn"
+          onclick="handleSignIn()"
+          class="btn-primary"
+          style="width:100%;height:52px;border-radius:12px;border:none;color:#fff;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px;">
+          <span id="btnText">Sign In</span>
+          <svg id="btnArrow" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg id="btnSpinner" width="20" height="20" viewBox="0 0 24 24" fill="none" class="spinner" style="display:none;" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none"/>
+            <path d="M12 2a10 10 0 0110 10" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
+          </svg>
+        </button>
+
+        <!-- Divider -->
+        <div class="flex items-center gap-3 mb-5">
+          <div class="divider-line"></div>
+          <span style="font-size:12px;color:#9CA3AF;white-space:nowrap;">— or continue with —</span>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Google Button -->
+        <button
+          type="button"
+          id="googleBtn"
+          onclick="handleGoogleSignIn()"
+          class="btn-google"
+          style="width:100%;height:48px;border-radius:12px;font-size:15px;font-weight:500;font-family:inherit;color:#374151;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px;">
+          <!-- Google G SVG -->
+          <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.9 3 4 11.9 4 23s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.2-2.7-.5-4z"/>
+            <path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 17 19.3 14 24 14c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 16.3 3 9.6 7.9 6.3 14.7z"/>
+            <path fill="#FBBC05" d="M24 43c5.4 0 10.2-1.8 14-5l-6.5-5.3C29.6 34.5 26.9 35.5 24 35.5c-6 0-11-4-12.9-9.6l-7 5.4C7.6 38.9 15.1 43 24 43z"/>
+            <path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-1 3-3.2 5.5-6.3 7l6.5 5.3C40.6 36.9 44.5 30.5 44.5 23c0-1-.1-2-.5-3z"/>
+          </svg>
+          Sign up with Google
+        </button>
+
+        <!-- Footer -->
+        <p style="text-align:center;font-size:14px;color:#9CA3AF;margin:0;">
+          Don't have an account?&nbsp;
+          <a href="#" style="color:#D94E1F;font-weight:600;text-decoration:none;"
+             onmouseover="this.style.textDecoration='underline'"
+             onmouseout="this.style.textDecoration='none'">Request Access →</a>
+        </p>
+
+      </form>
+    </div>
+  </div>
+  <!-- /RIGHT PANEL -->
+
+</div>
+<!-- /OUTER FLEX -->
+
+<script>
+  // ── Page load: fade-in animation for right panel
+  window.addEventListener('DOMContentLoaded', () => {
+    const panel = document.getElementById('rightPanel');
+    requestAnimationFrame(() => {
+      panel.classList.add('loaded');
+    });
+  });
+
+  // ── Toggle password visibility
+  function togglePassword() {
+    const input = document.getElementById('passwordInput');
+    const eyeOpen = document.getElementById('eyeOpen');
+    const eyeClosed = document.getElementById('eyeClosed');
+    if (input.type === 'password') {
+      input.type = 'text';
+      eyeOpen.style.display = 'none';
+      eyeClosed.style.display = 'block';
+    } else {
+      input.type = 'password';
+      eyeOpen.style.display = 'block';
+      eyeClosed.style.display = 'none';
+    }
+  }
+
+  // ── Show / hide field error
+  function showError(id, show) {
+    const el = document.getElementById(id);
+    if (show) {
+      el.classList.add('visible');
+    } else {
+      el.classList.remove('visible');
+    }
+  }
+
+  // ── Validate email
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  }
+
+  // ── Handle Sign In
+  function handleSignIn() {
+    const email = document.getElementById('emailInput').value;
+    const password = document.getElementById('passwordInput').value;
+    const btn = document.getElementById('signInBtn');
+
+    let hasError = false;
+
+    if (!email.trim() || !isValidEmail(email)) {
+      showError('emailError', true);
+      document.getElementById('emailInput').style.borderColor = '#EF4444';
+      hasError = true;
+    } else {
+      showError('emailError', false);
+      document.getElementById('emailInput').style.borderColor = '#E5E7EB';
+    }
+
+    if (!password.trim()) {
+      showError('passwordError', true);
+      document.getElementById('passwordInput').style.borderColor = '#EF4444';
+      hasError = true;
+    } else {
+      showError('passwordError', false);
+      document.getElementById('passwordInput').style.borderColor = '#E5E7EB';
+    }
+
+    if (hasError) return;
+
+    // Loading state
+    btn.disabled = true;
+    document.getElementById('btnText').textContent = 'Signing in...';
+    document.getElementById('btnArrow').style.display = 'none';
+    document.getElementById('btnSpinner').style.display = 'block';
+
+    setTimeout(() => {
+      window.location.href = 'dashboard.html';
+    }, 1200);
+  }
+
+  // ── Google Sign-In placeholder
+  function handleGoogleSignIn() {
+    alert('Google Sign-In integration coming soon!');
+  }
+
+  // ── Clear errors on input
+  document.getElementById('emailInput').addEventListener('input', function () {
+    showError('emailError', false);
+    this.style.borderColor = '#E5E7EB';
+  });
+  document.getElementById('passwordInput').addEventListener('input', function () {
+    showError('passwordError', false);
+    this.style.borderColor = '#E5E7EB';
+  });
+
+  // ── Enter key submits form
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') handleSignIn();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospital Finder – Clinical Concierge</title>
+  <meta name="description"
+    content="Find elite medical facilities near you — Clinical Concierge AI-powered hospital finder." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+      background: linear-gradient(180deg, #013A63 0%, #01497C 40%, #005F73 100%) fixed;
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      padding: 16px;
+    }
+
+    #appWrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45), 0 8px 24px rgba(0, 0, 0, 0.25), 0 1px 0 rgba(255, 255, 255, 0.1) inset;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    /* ── Navbar ── */
+    #topNav {
+      height: 56px;
+      min-height: 56px;
+      background: rgba(0, 0, 0, 0.22);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      z-index: 200;
+      flex-shrink: 0;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .nav-logo span {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em
+    }
+
+    .logo-cross {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #D94E1F, #E8622D);
+      border-radius: 8px;
+      flex-shrink: 0
+    }
+
+    .nav-center {
+      display: flex;
+      gap: 28px;
+      align-items: center
+    }
+
+    .nav-center a {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.48);
+      text-decoration: none;
+      transition: color 0.15s;
+      cursor: pointer
+    }
+
+    .nav-center a.active {
+      color: #fff;
+      font-weight: 600
+    }
+
+    .nav-center a:hover:not(.active) {
+      color: rgba(255, 255, 255, 0.8)
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .nav-icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.55);
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding: 6px;
+      transition: color 0.15s;
+      border-radius: 8px
+    }
+
+    .nav-icon-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08)
+    }
+
+    .bell-dot {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #EF4444
+    }
+
+    .nav-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1B3A8C, #0A1628);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer
+    }
+
+    /* ── Body row ── */
+    #bodyRow {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0
+    }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 240px;
+      min-width: 240px;
+      flex-shrink: 0;
+      background: rgba(0, 0, 0, 0.28);
+      border-right: 1px solid rgba(255, 255, 255, 0.07);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar-profile {
+      padding: 0 16px 16px
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2px
+    }
+
+    .brand-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff
+    }
+
+    .brand-sub {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.38);
+      letter-spacing: 0.04em
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.07);
+      margin: 0 16px 14px
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.42);
+      transition: all 0.15s ease;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+
+    .nav-item:hover {
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.04)
+    }
+
+    .nav-item.active {
+      background: rgba(217, 78, 31, 0.18);
+      border-left: 3px solid #D94E1F;
+      color: #fff;
+      font-weight: 600;
+      border-radius: 0 10px 10px 0;
+      margin-right: 12px
+    }
+
+    .sidebar-bottom {
+      padding: 16px
+    }
+
+    .book-btn {
+      width: 100%;
+      padding: 11px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1B3A8C, #0F2260);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease
+    }
+
+    .book-btn:hover {
+      background: linear-gradient(135deg, #D94E1F, #C04018);
+      border-color: transparent;
+      box-shadow: 0 6px 20px rgba(217, 78, 31, 0.35)
+    }
+
+    /* ── List panel ── */
+    #listPanel {
+      width: 330px;
+      min-width: 330px;
+      flex-shrink: 0;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 0
+    }
+
+    #listPanel::-webkit-scrollbar {
+      width: 4px
+    }
+
+    #listPanel::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 2px
+    }
+
+    #listPanel::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .panel-title {
+      font-size: 21px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 4px;
+      letter-spacing: -0.02em
+    }
+
+    .panel-subtitle {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.38);
+      margin-bottom: 14px
+    }
+
+    /* Search */
+    .search-wrap {
+      position: relative;
+      margin-bottom: 12px
+    }
+
+    .search-wrap input {
+      width: 100%;
+      height: 40px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.09);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      color: #fff;
+      font-size: 13px;
+      font-family: inherit;
+      padding: 0 16px 0 38px;
+      outline: none;
+      transition: border-color 0.15s
+    }
+
+    .search-wrap input::placeholder {
+      color: rgba(255, 255, 255, 0.32)
+    }
+
+    .search-wrap input:focus {
+      border-color: rgba(217, 78, 31, 0.5);
+      background: rgba(255, 255, 255, 0.11)
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.38);
+      pointer-events: none;
+      display: flex
+    }
+
+    /* Filter chips */
+    .chips-row {
+      display: flex;
+      gap: 7px;
+      margin-bottom: 16px;
+      flex-wrap: wrap
+    }
+
+    .filter-chip {
+      cursor: pointer;
+      border-radius: 20px;
+      padding: 6px 13px;
+      font-size: 11.5px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all 0.15s ease
+    }
+
+    .filter-chip:not(.active) {
+      background: rgba(255, 255, 255, 0.07);
+      color: rgba(255, 255, 255, 0.52);
+      border: 1px solid rgba(255, 255, 255, 0.1)
+    }
+
+    .filter-chip.active {
+      background: #D94E1F;
+      color: #fff;
+      border: 1px solid transparent;
+      box-shadow: 0 4px 14px rgba(217, 78, 31, 0.4)
+    }
+
+    /* Hospital cards */
+    #hospitalList {
+      display: flex;
+      flex-direction: column;
+      gap: 12px
+    }
+
+    .hospital-card {
+      background: rgba(255, 255, 255, 0.065);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      animation: cardIn 0.4s ease both
+    }
+
+    .hospital-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25)
+    }
+
+    @keyframes cardIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .hosp-img {
+      width: 78px;
+      height: 78px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden
+    }
+
+    .hosp-initial {
+      font-size: 24px;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.7);
+      z-index: 1
+    }
+
+    /* Bars */
+    .bar-track {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.09);
+      border-radius: 2px;
+      overflow: hidden
+    }
+
+    .trust-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #3B82F6, #06B6D4);
+      transition: width 0.8s ease
+    }
+
+    .safety-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #10B981, #34D399);
+      transition: width 0.8s ease
+    }
+
+    /* Badges */
+    .ai-tag {
+      background: rgba(217, 78, 31, 0.22);
+      border: 1px solid rgba(217, 78, 31, 0.5);
+      color: #FF8A65;
+      font-size: 8.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap
+    }
+
+    .er-badge {
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(16, 185, 129, 0.38);
+      color: #34D399;
+      font-size: 8.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 10px
+    }
+
+    .safety-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10B981;
+      display: inline-block;
+      animation: safePulse 2s ease-in-out infinite
+    }
+
+    @keyframes safePulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45)
+      }
+
+      50% {
+        opacity: 0.85;
+        transform: scale(1.12);
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0)
+      }
+    }
+
+    /* Rating stars */
+    .rating-stars {
+      color: #FBBF24;
+      font-size: 11px;
+      letter-spacing: 1px
+    }
+
+    /* Direction button — burnt orange gradient */
+    .dir-btn {
+      width: 100%;
+      height: 38px;
+      margin-top: 11px;
+      border: none;
+      border-radius: 9px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #E85D20, #C04018);
+      transition: all 0.18s ease;
+      letter-spacing: 0.01em
+    }
+
+    .dir-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+      box-shadow: 0 7px 22px rgba(217, 78, 31, 0.45)
+    }
+
+    .dir-btn:active {
+      transform: translateY(0)
+    }
+
+    /* Skeleton */
+    .skeleton-card {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px
+    }
+
+    .skeleton-img {
+      width: 78px;
+      height: 78px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.07);
+      flex-shrink: 0;
+      animation: shimmer 1.5s ease infinite alternate
+    }
+
+    .skeleton-line {
+      height: 11px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.07);
+      animation: shimmer 1.5s ease infinite alternate
+    }
+
+    @keyframes shimmer {
+      from {
+        opacity: 0.4
+      }
+
+      to {
+        opacity: 0.85
+      }
+    }
+
+    /* ── Map panel ── */
+    #mapWrap {
+      flex: 1;
+      position: relative;
+      min-height: 0
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+      border-radius: 0 16px 16px 0;
+      z-index: 1;
+    }
+
+    /* Remove default Leaflet blue outline */
+    .leaflet-container {
+      font-family: 'Inter', sans-serif !important;
+      outline: none !important;
+    }
+
+    #refreshBtn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 1000;
+      background: rgba(1, 26, 50, 0.88);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-radius: 9px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    #refreshBtn:hover {
+      background: linear-gradient(135deg, #E85D20, #C04018);
+      border-color: transparent;
+      box-shadow: 0 4px 16px rgba(217, 78, 31, 0.4)
+    }
+
+    #refreshBtn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed
+    }
+
+    /* Map loading overlay */
+    #mapLoading {
+      position: absolute;
+      inset: 0;
+      z-index: 999;
+      background: rgba(1, 22, 44, 0.8);
+      backdrop-filter: blur(5px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px
+    }
+
+    #mapLoading .spin {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.09);
+      border-top-color: #D94E1F;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    #mapLoading p {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500
+    }
+
+    #statusMsg {
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.45);
+      display: none
+    }
+
+    /* User marker */
+    .user-location-marker {
+      position: relative;
+      width: 24px;
+      height: 24px
+    }
+
+    .user-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #D94E1F;
+      z-index: 2;
+      box-shadow: 0 0 0 2.5px rgba(255, 255, 255, 0.9)
+    }
+
+    .user-pulse {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(217, 78, 31, 0.3);
+      animation: userPulse 2s ease-out infinite
+    }
+
+    /* Leaflet popup */
+    .custom-popup .leaflet-popup-content-wrapper {
+      background: white !important;
+      border-radius: 14px !important;
+      box-shadow: 0 8px 30px rgba(15, 27, 45, 0.2) !important;
+      border: 1px solid rgba(15, 27, 45, 0.08) !important;
+      padding: 0 !important;
+    }
+
+    .custom-popup .leaflet-popup-content {
+      margin: 14px !important;
+    }
+
+    .custom-popup .leaflet-popup-tip {
+      background: white !important;
+    }
+
+    @keyframes userPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.5);
+      }
+
+      70% {
+        box-shadow: 0 0 0 16px rgba(234, 88, 12, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(234, 88, 12, 0);
+      }
+    }
+
+    @keyframes aiPulse {
+      0% {
+        box-shadow: 0 4px 20px rgba(234, 88, 12, 0.5),
+          0 0 0 0 rgba(234, 88, 12, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 4px 20px rgba(234, 88, 12, 0.5),
+          0 0 0 20px rgba(234, 88, 12, 0);
+      }
+
+      100% {
+        box-shadow: 0 4px 20px rgba(234, 88, 12, 0.5),
+          0 0 0 0 rgba(234, 88, 12, 0);
+      }
+    }
+
+    /* Marker hover scale */
+    .leaflet-marker-icon:hover {
+      transform: scale(1.15) !important;
+      transition: transform 0.2s ease !important;
+      z-index: 1000 !important;
+    }
+
+    /* Responsive */
+    @media(max-width:1100px) {
+      #sidebar {
+        width: 64px;
+        min-width: 64px
+      }
+
+      .sidebar-profile,
+      .nav-item span,
+      .sidebar-bottom {
+        display: none
+      }
+
+      .nav-item {
+        justify-content: center;
+        padding: 12px 0;
+        margin-right: 0;
+        border-radius: 0
+      }
+
+      .nav-item.active {
+        border-radius: 0;
+        margin-right: 0
+      }
+    }
+
+    @media(max-width:768px) {
+      body {
+        padding: 8px
+      }
+
+      #sidebar {
+        display: none
+      }
+
+      #listPanel {
+        width: 270px;
+        min-width: 270px;
+        padding: 14px 12px
+      }
+
+      .panel-title {
+        font-size: 18px
+      }
+
+      .nav-center {
+        display: none
+      }
+    }
+
+    @media(max-width:560px) {
+      #listPanel {
+        width: 220px;
+        min-width: 220px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="appWrap">
+
+    <!-- ════ TOP NAV ════ -->
+    <nav id="topNav">
+      <div class="nav-logo">
+        <div class="logo-cross">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <rect x="10" y="2" width="4" height="20" rx="2" fill="#fff" />
+            <rect x="2" y="10" width="20" height="4" rx="2" fill="#fff" />
+          </svg>
+        </div>
+        <span>Clinical Concierge</span>
+      </div>
+      <div class="nav-center">
+        <a href="dashboard.html">Dashboard</a>
+        <a class="active">Hospital Finder</a>
+        <a href="symptoms.html">Symptoms</a>
+        <a href="#">Concierge Care</a>
+      </div>
+      <div class="nav-right">
+        <button class="nav-icon-btn" aria-label="Notifications">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
+          </svg>
+          <span class="bell-dot"></span>
+        </button>
+        <div class="nav-avatar" onclick="window.location.href='dashboard.html'" title="Go to Dashboard">JV</div>
+      </div>
+    </nav>
+
+    <!-- ════ BODY ROW ════ -->
+    <div id="bodyRow">
+
+      <!-- ════ SIDEBAR ════ -->
+      <aside id="sidebar">
+        <div class="sidebar-profile">
+          <div class="brand-row">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <rect x="10" y="2" width="4" height="20" rx="2" fill="#D94E1F" />
+              <rect x="2" y="10" width="20" height="4" rx="2" fill="#D94E1F" />
+            </svg>
+            <span class="brand-name">The Clinical Boutique</span>
+          </div>
+          <div class="brand-sub">PREMIUM CONCIERGE MEMBER</div>
+        </div>
+        <div class="sidebar-divider"></div>
+
+        <a href="dashboard.html" class="nav-item">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <div class="nav-item active">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            style="flex-shrink:0">
+            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1118 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          <span>Hospital Finder</span>
+        </div>
+        <a href="symptoms.html" class="nav-item">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            style="flex-shrink:0">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-2.5-2.5" />
+            <path d="M11 8v6M8 11h6" stroke-linecap="round" />
+          </svg>
+          <span>Symptoms</span>
+        </a>
+        <a href="#" class="nav-item">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            style="flex-shrink:0">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+          <span>Medical Records</span>
+        </a>
+        <a href="#" class="nav-item">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            style="flex-shrink:0">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+          </svg>
+          <span>Settings</span>
+        </a>
+
+        <div style="flex:1"></div>
+        <div class="sidebar-bottom">
+          <button class="book-btn" onclick="alert('Consultation booking coming soon!')">⚡ Book Consultation</button>
+        </div>
+      </aside>
+
+      <!-- ════ LIST PANEL ════ -->
+      <div id="listPanel">
+        <h2 class="panel-title">Elite Medical Facilities</h2>
+        <p class="panel-subtitle">AI-ranked by trust, safety &amp; distance</p>
+
+        <!-- Search -->
+        <div class="search-wrap">
+          <span class="search-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-2.5-2.5" />
+            </svg>
+          </span>
+          <input type="search" id="hospitalSearch" placeholder="Search by name or specialty…"
+            oninput="filterHospitals()" autocomplete="off" />
+        </div>
+
+        <!-- Filter chips -->
+        <div class="chips-row">
+          <button class="filter-chip active" data-filter="all" onclick="filterByCategory(this)">All Facilities</button>
+          <button class="filter-chip" data-filter="er" onclick="filterByCategory(this)">ER Open</button>
+          <button class="filter-chip" data-filter="specialist" onclick="filterByCategory(this)">Specialists</button>
+        </div>
+
+        <!-- Cards container -->
+        <div id="hospitalList"></div>
+      </div>
+
+      <!-- ════ MAP PANEL ════ -->
+      <div id="mapWrap">
+        <div id="map"></div>
+        <button id="refreshBtn" onclick="handleHospitalLocate()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round">
+            <polyline points="23 4 23 10 17 10" />
+            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+          </svg>
+          Refresh Location
+        </button>
+        <div id="mapLoading">
+          <div class="spin"></div>
+          <p>Locating nearby facilities…</p>
+          <span id="statusMsg"></span>
+        </div>
+      </div>
+
+    </div><!-- /bodyRow -->
+  </div><!-- /appWrap -->
+
+  <script>
+    // ═══════════════════════════════════════════════════════
+    //  STATE
+    // ═══════════════════════════════════════════════════════
+    let map = null;
+    let userMarker = null;
+    let hospitalMarkers = [];
+    let allHospitals = [];
+    let userLat = null;
+    let userLon = null;
+
+    // ═══════════════════════════════════════════════════════
+    //  INIT
+    // ═══════════════════════════════════════════════════════
+    window.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      handleHospitalLocate();
+    });
+
+    // ═══════════════════════════════════════════════════════
+    //  MAP INIT — Dark mode with teal-tinted roads
+    // ═══════════════════════════════════════════════════════
+    function initMap() {
+      map = L.map('map', { zoomControl: false, attributionControl: true })
+        .setView([20.5937, 78.9629], 5);
+
+      // Dark CartoDB tile layer — CSS filter gives teal road tint
+      const tileLayer = L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}{r}.png',
+        { attribution: '© OpenStreetMap contributors © CARTO', maxZoom: 19 }
+      ).addTo(map);
+
+      // Apply teal road tint via CSS filter on the tile container
+      tileLayer.on('load', () => {
+        const container = tileLayer.getContainer();
+        if (container) container.style.filter = 'hue-rotate(155deg) saturate(0.55) brightness(0.92)';
+      });
+
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+      setTimeout(() => map.invalidateSize(), 120);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  MAIN LOCATE FUNCTION  — JS Logic Bridge Entry Point
+    //  ──────────────────────────────────────────────────────
+    //  This is the public function wired to the "Refresh
+    //  Location" button. It:
+    //    1. Uses navigator.geolocation to get coordinates
+    //    2. Calls fetchNearbyHospitals(lat, lon) [internal]
+    //    3. After results arrive, processHospitalData calls
+    //       calculateNearHospitals() for AI recommendation
+    //
+    //  HOOK: Replace the body of this function if you want
+    //  to inject a completely custom locate flow.
+    // ═══════════════════════════════════════════════════════
+    function handleHospitalLocate() {
+      showLoading(true);
+      showStatus('Requesting your location…');
+
+      if (!navigator.geolocation) {
+        showError('Geolocation is not supported by your browser.');
+        showLoading(false);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          userLat = position.coords.latitude;
+          userLon = position.coords.longitude;
+          placeUserMarker(userLat, userLon);
+          map.setView([userLat, userLon], 14);
+          showStatus('Scanning nearby medical facilities…');
+
+          // HOOK: Replace fetchNearbyHospitals with your own data source.
+          // Your function must eventually call:
+          //   processHospitalData(elements, userLat, userLon)
+          // where elements is an array of Overpass-like objects,
+          // OR call renderHospitalCards(hospitals) directly with
+          // pre-built hospital objects.
+          fetchNearbyHospitals(userLat, userLon);
+        },
+        (error) => {
+          showLoading(false);
+          const msgs = {
+            1: 'Permission denied. Please allow location access in your browser settings.',
+            2: 'Location unavailable. Please try again.',
+            3: 'Location request timed out. Please retry.'
+          };
+          showError(msgs[error.code] || 'Location access denied.');
+        },
+        { timeout: 10000, maximumAge: 60000 }
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  USER MARKER
+    // ═══════════════════════════════════════════════════════
+    function placeUserMarker(lat, lon) {
+      if (userMarker) map.removeLayer(userMarker);
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="user-location-marker">
+             <div class="user-pulse"></div>
+             <div class="user-dot"></div>
+           </div>`,
+        iconSize: [24, 24], iconAnchor: [12, 12]
+      });
+      userMarker = L.marker([lat, lon], { icon })
+        .addTo(map)
+        .bindPopup('<b style="font-family:Inter,sans-serif;font-size:12px">📍 YOUR LOCATION</b>');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  FETCH FROM OVERPASS API  (5 km radius, fallback 15 km)
+    // ═══════════════════════════════════════════════════════
+    async function fetchNearbyHospitals(lat, lon) {
+      const radius = 5000;
+      const query = `
+    [out:json][timeout:25];
+    (
+      node["amenity"="hospital"](around:${radius},${lat},${lon});
+      node["amenity"="clinic"](around:${radius},${lat},${lon});
+      node["healthcare"="hospital"](around:${radius},${lat},${lon});
+      way["amenity"="hospital"](around:${radius},${lat},${lon});
+      relation["amenity"="hospital"](around:${radius},${lat},${lon});
+    );
+    out body center 20;
+  `;
+      try {
+        const res = await fetch('https://overpass-api.de/api/interpreter', {
+          method: 'POST',
+          body: 'data=' + encodeURIComponent(query)
+        });
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        if (!data.elements || data.elements.length === 0) {
+          return fetchNearbyHospitals_extended(lat, lon);
+        }
+        processHospitalData(data.elements, lat, lon);
+      } catch (err) {
+        console.error('Overpass error:', err);
+        showLoading(false);
+        showError('Could not fetch hospitals. Check your internet connection.');
+      }
+    }
+
+    async function fetchNearbyHospitals_extended(lat, lon) {
+      const query = `
+    [out:json][timeout:30];
+    (
+      node["amenity"="hospital"](around:15000,${lat},${lon});
+      way["amenity"="hospital"](around:15000,${lat},${lon});
+    );
+    out body center 15;
+  `;
+      try {
+        const res = await fetch('https://overpass-api.de/api/interpreter', {
+          method: 'POST', body: 'data=' + encodeURIComponent(query)
+        });
+        const data = await res.json();
+        processHospitalData(data.elements || [], lat, lon);
+      } catch {
+        showLoading(false);
+        showError('No hospitals found within 15 km radius.');
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  PROCESS & ENRICH DATA
+    // ═══════════════════════════════════════════════════════
+    function processHospitalData(elements, uLat, uLon) {
+      hospitalMarkers.forEach(m => map.removeLayer(m));
+      hospitalMarkers = [];
+
+      const seen = new Set();
+      let hospitals = elements
+        .filter(el => {
+          const name = el.tags?.name;
+          if (!name || seen.has(name)) return false;
+          seen.add(name); return true;
+        })
+        .map(el => {
+          const lat = el.lat || el.center?.lat;
+          const lon = el.lon || el.center?.lon;
+          if (!lat || !lon) return null;
+          const tags = el.tags || {};
+          const distKm = calculateDistance(uLat, uLon, lat, lon);
+          const trust = generateTrustScore(tags);
+          const safety = generateSafetyScore(tags);
+          const cost = getCostLevel(tags);
+          return {
+            id: el.id, name: tags.name || 'Medical Facility',
+            lat, lon,
+            distanceKm: distKm.toFixed(1),
+            area: tags['addr:suburb'] || tags['addr:city'] || tags['addr:district'] || getQuadrant(lat, lon, uLat, uLon),
+            trustScore: trust,
+            safetyScore: safety,
+            costLevel: cost,
+            specialty: getSpecialty(tags),
+            isEROpen: checkEROpen(tags),
+            phone: tags.phone || tags['contact:phone'] || null,
+            website: tags.website || tags['contact:website'] || null,
+            emergency: tags.emergency === 'yes',
+            beds: tags.beds || null,
+            ratingStars: starsFromScore(trust, safety),
+            googleMapsUrl: `https://www.google.com/maps/search/${encodeURIComponent(tags.name || 'hospital')}/@${lat},${lon},17z`,
+            aiRecommended: false
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => parseFloat(a.distanceKm) - parseFloat(b.distanceKm))
+        .slice(0, 8);
+
+      // ── AI RECOMMENDATION (calls user-overridable function) ──
+      // HOOK: The result of calculateNearHospitals() determines which card
+      // gets the "RECOMMENDED" tag. Replace that function with your own logic.
+      const recommended = calculateNearHospitals(hospitals);
+      if (hospitals.length > 0) {
+        const recIdx = recommended ? hospitals.findIndex(h => h.id === recommended.id) : -1;
+        const target = recIdx > -1 ? recIdx : 0;
+        hospitals[target].aiRecommended = true;
+        // Bubble up to top of list
+        if (target > 0) {
+          const [rec] = hospitals.splice(target, 1);
+          hospitals.unshift(rec);
+        }
+      }
+
+      allHospitals = hospitals;
+      renderHospitalCards(hospitals);
+      renderMapMarkers(hospitals);
+      showLoading(false);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  AI RECOMMENDATION LOGIC
+    //  ──────────────────────────────────────────────────────
+    //  HOOK: Override this entire function with your own
+    //  scoring algorithm. The function receives the processed
+    //  hospitals array and should return the single hospital
+    //  object that is the best recommendation.
+    //
+    //  Current formula: weighted blend of trust (50%),
+    //  safety (30%), penalised by distance (×5) and cost (×8).
+    //  The safest & most affordable facility wins.
+    // ═══════════════════════════════════════════════════════
+    function calculateNearHospitals(hospitals) {
+      if (!hospitals || hospitals.length === 0) return null;
+
+      // HOOK: Insert your custom AI/scoring logic below.
+      // You receive: hospitals[] with fields:
+      //   trustScore (0-99), safetyScore (0-99),
+      //   distanceKm (string), costLevel (1-3),
+      //   isEROpen (bool), specialty (string|null)
+      const scored = hospitals.map(h => ({
+        ...h,
+        aiScore: (h.trustScore * 0.50)
+          + (h.safetyScore * 0.30)
+          - (parseFloat(h.distanceKm) * 5)
+          - (h.costLevel * 8)
+      }));
+      scored.sort((a, b) => b.aiScore - a.aiScore);
+      return scored[0];
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  SCORE GENERATORS
+    // ═══════════════════════════════════════════════════════
+    function generateTrustScore(tags) {
+      let s = 70;
+      if (tags.emergency === 'yes') s += 10;
+      if (tags.beds && parseInt(tags.beds) > 100) s += 8;
+      if (tags.website || tags['contact:website']) s += 4;
+      if (tags.phone || tags['contact:phone']) s += 3;
+      if (tags.operator) s += 3;
+      if (tags['healthcare:speciality']) s += 5;
+      return Math.min(s, 99);
+    }
+
+    function generateSafetyScore(tags) {
+      let s = 72;
+      if (tags.emergency === 'yes') s += 12;
+      if (tags['health_facility:type'] === 'hospital') s += 6;
+      if (tags.beds && parseInt(tags.beds) > 50) s += 5;
+      if (tags.opening_hours) s += 3;
+      return Math.min(s, 99);
+    }
+
+    function getCostLevel(tags) {
+      if (tags.fee === 'no' || tags.access === 'public' || tags.operator_type === 'public') return 1;
+      if (tags.operator_type === 'private') return 3;
+      return 2;
+    }
+
+    function getSpecialty(tags) {
+      const s = tags['healthcare:speciality'] || tags.speciality;
+      return s ? s.split(';')[0].trim() : null;
+    }
+
+    function checkEROpen(tags) {
+      return tags.emergency === 'yes' || tags['emergency:phone'] != null;
+    }
+
+    function getQuadrant(hlat, hlon, ulat, ulon) {
+      return `${hlat > ulat ? 'North' : 'South'} ${hlon > ulon ? 'East' : 'West'}`;
+    }
+
+    function starsFromScore(trust, safety) {
+      const avg = (trust + safety) / 2;
+      if (avg >= 90) return '★★★★★';
+      if (avg >= 80) return '★★★★☆';
+      if (avg >= 70) return '★★★☆☆';
+      if (avg >= 60) return '★★☆☆☆';
+      return '★☆☆☆☆';
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  HAVERSINE DISTANCE
+    // ═══════════════════════════════════════════════════════
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371, toRad = d => d * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  RENDER HOSPITAL CARDS  — Full Functional Matrix
+    // ═══════════════════════════════════════════════════════
+    function renderHospitalCards(hospitals) {
+      const list = document.getElementById('hospitalList');
+      if (!hospitals || hospitals.length === 0) {
+        list.innerHTML = `
+      <div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.38)">
+        <div style="font-size:32px;margin-bottom:12px">🏥</div>
+        <div style="font-size:14px;font-weight:500">No hospitals found nearby.</div>
+        <div style="font-size:12px;margin-top:6px">Try expanding your search radius.</div>
+      </div>`;
+        return;
+      }
+
+      list.innerHTML = hospitals.map((h, i) => {
+        // ── 1. Cost Indicator ($$$) ──
+        const costSymbols = '$'.repeat(h.costLevel);
+        const costLabel = ['', 'AFFORDABLE', 'MODERATE', 'PREMIUM'][h.costLevel];
+
+        // ── 2. Safety Pulse Badge (high scores ≥ 88) ──
+        const safetyPulse = h.safetyScore >= 88
+          ? `<span class="safety-pulse" title="High Safety Score"></span>
+         <span style="font-size:9.5px;color:#10B981;font-weight:500;margin-left:3px">Safe</span>`
+          : '';
+
+        // ── 3. AI Recommendation Tag ──
+        const aiTag = h.aiRecommended
+          ? `<span class="ai-tag">★ AI RECOMMENDED</span>` : '';
+
+        // ── 4. ER Open Badge ──
+        const erBadge = h.isEROpen
+          ? `<span class="er-badge">ER OPEN</span>` : '';
+
+        // ── 5. Rating Stars ──
+        const ratingHtml = `<span class="rating-stars" title="Rating based on trust & safety">${h.ratingStars}</span>`;
+
+        // ── 6. Gradient color for hospital avatar ──
+        const gradients = [
+          'linear-gradient(135deg,#1B3A8C,#0A1628)',
+          'linear-gradient(135deg,#065F46,#0A1628)',
+          'linear-gradient(135deg,#7C3AED,#1E1B4B)',
+          'linear-gradient(135deg,#B45309,#0A1628)',
+          'linear-gradient(135deg,#0E7490,#0A1628)',
+        ];
+        const grad = gradients[i % gradients.length];
+        const safeName = h.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        return `
+    <div class="hospital-card" data-id="${h.id}"
+         data-category="${h.isEROpen ? 'er' : (h.specialty ? 'specialist' : 'all')}"
+         onclick="selectHospital(${i})"
+         style="animation-delay:${i * 75}ms"
+         data-gmap-url="${h.googleMapsUrl}">
+
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <!-- Hospital Avatar -->
+        <div class="hosp-img" style="background:${grad}">
+          <span class="hosp-initial">${h.name.charAt(0).toUpperCase()}</span>
+        </div>
+
+        <!-- Card Content -->
+        <div style="flex:1;min-width:0">
+          <!-- Name + Tags row -->
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:2px">
+            <span style="font-size:13.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px" title="${h.name}">${h.name}</span>
+            ${aiTag}${erBadge}
+          </div>
+
+          <!-- Distance + Area -->
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:5px">
+            📍 ${h.distanceKm} km away &bull; ${h.area}
+          </div>
+
+          <!-- Rating Stars -->
+          <div style="margin-bottom:8px">${ratingHtml}</div>
+
+          <!-- Trust Score Bar -->
+          <div style="margin-bottom:7px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+              <span style="font-size:8px;color:rgba(255,255,255,0.36);text-transform:uppercase;letter-spacing:0.08em">TRUST SCORE</span>
+              <span style="font-size:10px;color:#60A5FA;font-weight:600">${h.trustScore}%</span>
+            </div>
+            <div class="bar-track"><div class="trust-fill" style="width:${h.trustScore}%"></div></div>
+          </div>
+
+          <!-- Safety Meter + Concierge Price row -->
+          <div style="display:flex;justify-content:space-between;align-items:flex-end">
+            <!-- Safety Meter Badge -->
+            <div>
+              <div style="font-size:8px;color:rgba(255,255,255,0.36);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px">SAFETY METER</div>
+              <div class="bar-track" style="width:82px"><div class="safety-fill" style="width:${h.safetyScore}%"></div></div>
+              <div style="display:flex;align-items:center;gap:4px;margin-top:3px">
+                <span style="font-size:10px;color:#34D399;font-weight:600">${h.safetyScore}%</span>
+                ${safetyPulse}
+              </div>
+            </div>
+
+            <!-- Concierge Price -->
+            <div style="text-align:right">
+              <div style="font-size:8px;color:rgba(255,255,255,0.36);text-transform:uppercase;letter-spacing:0.08em">CONCIERGE PRICE</div>
+              <div style="font-size:15px;font-weight:800;color:#fff;letter-spacing:1.5px">${costSymbols}</div>
+              <div style="font-size:8.5px;color:rgba(255,255,255,0.32)">${costLabel}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Burnt Orange Gradient Button -->
+      <button class="dir-btn"
+        onclick="event.stopPropagation();openDirections(${h.lat},${h.lon},'${safeName}')">
+        ◈ Get Directions
+      </button>
+    </div>`;
+      }).join('');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  RENDER MAP MARKERS
+    // ═══════════════════════════════════════════════════════
+    function renderMapMarkers(hospitals) {
+      hospitals.forEach((h, i) => {
+        const color = h.aiRecommended ? '#D94E1F' : '#3B82F6';
+        const size = h.aiRecommended ? 36 : 30;
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="
+        width:${size}px;height:${size}px;
+        border-radius:50% 50% 50% 0;
+        background:${color};
+        transform:rotate(-45deg);
+        border:2.5px solid rgba(255,255,255,0.5);
+        box-shadow:0 4px 14px rgba(0,0,0,0.45)
+      "></div>`,
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size]
+        });
+
+        const marker = L.marker([h.lat, h.lon], { icon })
+          .addTo(map)
+          .bindPopup(`
+        <div style="font-family:Inter,sans-serif;min-width:190px;line-height:1.5">
+          <b style="font-size:13px">${h.name}</b><br>
+          <span style="font-size:11px;color:#94A3B8">${h.distanceKm} km away &bull; ${h.area}</span><br>
+          <span style="font-size:11px;color:#60A5FA">Trust: ${h.trustScore}%</span>
+          &nbsp;&bull;&nbsp;
+          <span style="font-size:11px;color:#34D399">Safety: ${h.safetyScore}%</span><br>
+          ${h.aiRecommended ? '<span style="color:#FF8A65;font-size:11px;font-weight:700">★ AI Recommended</span><br>' : ''}
+          <button onclick="openDirections(${h.lat},${h.lon},'${h.name.replace(/'/g, "\\'")}');return false;"
+            style="margin-top:8px;background:linear-gradient(135deg,#E85D20,#C04018);color:white;border:none;padding:6px 14px;border-radius:7px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">
+            Get Directions
+          </button>
+          <a href="${h.googleMapsUrl}" target="_blank"
+            style="display:block;margin-top:6px;font-size:10.5px;color:#60A5FA;text-align:center">
+            View on Google Maps ↗
+          </a>
+        </div>
+      `);
+
+        marker.on('click', () => selectHospital(i));
+        hospitalMarkers.push(marker);
+      });
+
+      if (hospitalMarkers.length > 0) {
+        const group = L.featureGroup([...hospitalMarkers, userMarker].filter(Boolean));
+        map.fitBounds(group.getBounds().pad(0.15));
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  SELECT HOSPITAL  — Sync card + map
+    // ═══════════════════════════════════════════════════════
+    function selectHospital(index) {
+      const h = allHospitals[index];
+      if (!h) return;
+      map.setView([h.lat, h.lon], 16, { animate: true });
+      if (hospitalMarkers[index]) hospitalMarkers[index].openPopup();
+      document.querySelectorAll('.hospital-card').forEach((c, i) => {
+        c.style.border = i === index ? '1px solid rgba(217,78,31,0.65)' : '1px solid rgba(255,255,255,0.1)';
+        c.style.background = i === index ? 'rgba(217,78,31,0.07)' : 'rgba(255,255,255,0.065)';
+        c.style.boxShadow = i === index ? '0 0 0 1px rgba(217,78,31,0.3)' : '';
+      });
+      const cards = document.querySelectorAll('.hospital-card');
+      if (cards[index]) cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  OPEN DIRECTIONS  — Google Maps with user origin
+    // ═══════════════════════════════════════════════════════
+    function openDirections(lat, lon, name) {
+      const url = userLat
+        ? `https://www.google.com/maps/dir/${userLat},${userLon}/${lat},${lon}`
+        : `https://www.google.com/maps/search/${encodeURIComponent(name)}/@${lat},${lon},15z`;
+      window.open(url, '_blank');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  SEARCH & FILTER
+    // ═══════════════════════════════════════════════════════
+    function filterHospitals() {
+      const q = document.getElementById('hospitalSearch').value.toLowerCase().trim();
+      const filtered = q
+        ? allHospitals.filter(h =>
+          h.name.toLowerCase().includes(q) ||
+          h.area.toLowerCase().includes(q) ||
+          (h.specialty && h.specialty.toLowerCase().includes(q))
+        )
+        : allHospitals;
+      renderHospitalCards(filtered);
+    }
+
+    function filterByCategory(chip) {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const f = chip.dataset.filter;
+      let filtered = allHospitals;
+      if (f === 'er') filtered = allHospitals.filter(h => h.isEROpen);
+      else if (f === 'specialist') filtered = allHospitals.filter(h => h.specialty);
+      renderHospitalCards(filtered);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  UI HELPERS
+    // ═══════════════════════════════════════════════════════
+    function showLoading(show) {
+      document.getElementById('mapLoading').style.display = show ? 'flex' : 'none';
+      document.getElementById('refreshBtn').disabled = show;
+      if (show) {
+        document.getElementById('hospitalList').innerHTML = [1, 2, 3].map(() => `
+      <div class="skeleton-card">
+        <div class="skeleton-img"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:9px;padding-top:4px">
+          <div class="skeleton-line" style="width:68%"></div>
+          <div class="skeleton-line" style="width:42%;height:8px"></div>
+          <div class="skeleton-line" style="width:88%;height:6px"></div>
+          <div class="skeleton-line" style="width:58%;height:6px"></div>
+        </div>
+      </div>`).join('');
+      }
+    }
+
+    function showStatus(msg) {
+      const el = document.getElementById('statusMsg');
+      if (el) { el.textContent = msg; el.style.display = 'block'; }
+    }
+
+    function showError(msg) {
+      document.getElementById('hospitalList').innerHTML = `
+    <div style="padding:28px 16px;text-align:center">
+      <div style="font-size:30px;margin-bottom:10px">⚠️</div>
+      <div style="font-size:13px;color:#EF4444;font-weight:600;margin-bottom:4px">${msg}</div>
+      <div style="font-size:11.5px;color:rgba(255,255,255,0.38);margin-bottom:16px">
+        Enable location access in browser settings and retry.
+      </div>
+      <button onclick="handleHospitalLocate()"
+        style="background:linear-gradient(135deg,#E85D20,#C04018);color:white;border:none;padding:9px 22px;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600">
+        ↻ Try Again
+      </button>
+    </div>`;
+    }
+  </script>
+  <!-- Code injected by live-server -->
+  <script>
+    // <![CDATA[  <-- For SVG support
+    if ('WebSocket' in window) {
+      (function () {
+        function refreshCSS() {
+          var sheets = [].slice.call(document.getElementsByTagName("link"));
+          var head = document.getElementsByTagName("head")[0];
+          for (var i = 0; i < sheets.length; ++i) {
+            var elem = sheets[i];
+            var parent = elem.parentElement || head;
+            parent.removeChild(elem);
+            var rel = elem.rel;
+            if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+              var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+              elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+            }
+            parent.appendChild(elem);
+          }
+        }
+        var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+        var address = protocol + window.location.host + window.location.pathname + '/ws';
+        var socket = new WebSocket(address);
+        socket.onmessage = function (msg) {
+          if (msg.data == 'reload') window.location.reload();
+          else if (msg.data == 'refreshcss') refreshCSS();
+        };
+        if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+          console.log('Live reload enabled.');
+          sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+        }
+      })();
+    }
+    else {
+      console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+    }
+    // ]]>
+  </script>
+</body>
+
+</html>

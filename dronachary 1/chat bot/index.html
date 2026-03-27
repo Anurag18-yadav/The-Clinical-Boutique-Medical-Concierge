@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – The Clinical Boutique</title>
+  <meta name="description" content="Clinical dashboard for The Clinical Boutique — AI-powered healthcare platform." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'navy-deep':    '#0A1628',
+            'navy-mid':     '#1B3A8C',
+            'navy-accent':  '#1A3A6B',
+            'brand-orange': '#D94E1F',
+            'brand-orange-dark': '#B8401A',
+            'brand-orange-light':'#F97316',
+            'surface':      '#FFFFFF',
+            'page-bg':      '#F1F4F9',
+            'border-col':   '#E5E7EB',
+            'text-primary': '#0A1628',
+            'text-secondary':'#6B7280',
+            'text-muted':   '#9CA3AF',
+            'icon-teal':    '#0EA5E9',
+            'icon-green':   '#10B981',
+            'icon-orange':  '#F97316',
+            'icon-purple':  '#8B5CF6',
+          },
+          fontFamily: {
+            sans: ['Inter','-apple-system','BlinkMacSystemFont','SF Pro Display','system-ui','sans-serif'],
+          },
+          borderRadius: { 'xl': '12px' },
+        },
+      },
+    };
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+      background: #F1F4F9;
+      overflow-x: hidden;
+    }
+
+    /* ── Layout shell ── */
+    #appShell { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 220px; min-width: 220px; height: 100vh;
+      background: #FFFFFF; border-right: 1px solid #E5E7EB;
+      display: flex; flex-direction: column;
+      overflow-y: auto; overflow-x: hidden;
+      transition: width 0.25s ease, min-width 0.25s ease;
+      position: relative; z-index: 30;
+    }
+    #sidebar.collapsed { width: 64px; min-width: 64px; }
+    #sidebar.collapsed .nav-label, #sidebar.collapsed .logo-text,
+    #sidebar.collapsed .sidebar-bottom-label, #sidebar.collapsed #emergencyText { display: none; }
+    #sidebar.collapsed .nav-item { justify-content: center; padding-left: 0; padding-right: 0; }
+    #sidebar.collapsed .logo-block { justify-content: center; padding: 0 12px; }
+    #sidebar.collapsed #emergencyBtn { width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: 50%; margin: 0 auto; }
+
+    /* ── Sidebar overlay (mobile) ── */
+    #sidebarOverlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(10,22,40,0.5); z-index: 29;
+    }
+    #sidebarOverlay.visible { display: block; }
+
+    /* ── Nav item states ── */
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 0 12px 12px 0;
+      cursor: pointer; transition: all 0.15s ease;
+      font-size: 14px; font-weight: 500; color: #374151;
+      margin-right: 12px; position: relative;
+      border-left: 3px solid transparent;
+      user-select: none;
+    }
+    .nav-item:hover { background: #F3F4F6; color: #0A1628; }
+    .nav-item.active {
+      background: #EEF2FF; color: #1B3A8C;
+      border-left: 3px solid #1B3A8C;
+      font-weight: 600;
+    }
+    .nav-item.active svg { color: #1B3A8C; }
+
+    /* ── Main area ── */
+    #mainArea { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Navbar ── */
+    #topNav {
+      height: 64px; min-height: 64px;
+      background: #FFFFFF; border-bottom: 1px solid #E5E7EB;
+      padding: 0 28px; display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* ── Search ── */
+    .search-wrap { position: relative; width: 320px; }
+    .search-wrap input {
+      width: 100%; height: 40px; border-radius: 20px;
+      background: #F3F4F6; border: none; padding: 0 16px 0 40px;
+      font-size: 14px; color: #6B7280; font-family: inherit;
+      outline: none; transition: box-shadow 0.2s;
+    }
+    .search-wrap input:focus { box-shadow: 0 0 0 2px rgba(27,58,140,0.18); }
+    .search-wrap .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: #9CA3AF; pointer-events: none; display: flex;
+    }
+
+    /* ── Bell dropdown ── */
+    .bell-wrap { position: relative; }
+    .bell-btn {
+      width: 40px; height: 40px; border-radius: 50%; background: none; border: none;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: #6B7280; position: relative; transition: background 0.15s;
+    }
+    .bell-btn:hover { background: #F3F4F6; }
+    .bell-badge {
+      position: absolute; top: 6px; right: 6px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #EF4444; border: 1.5px solid #fff;
+    }
+    .bell-dropdown {
+      position: absolute; top: 48px; right: 0;
+      background: #FFFFFF; border-radius: 12px;
+      border: 1px solid #E5E7EB;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      padding: 12px 16px; width: 220px;
+      font-size: 14px; font-weight: 600; color: #0A1628;
+      opacity: 0; transform: translateY(-8px);
+      pointer-events: none;
+      transition: all 0.18s ease;
+      z-index: 100;
+    }
+    .bell-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .bell-dropdown p { font-size: 12px; font-weight: 400; color: #6B7280; margin-top: 4px; }
+
+    /* ── Avatar ── */
+    .avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, #1B3A8C, #0A1628);
+      border: 2px solid #E5E7EB;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* ── Scrollable content ── */
+    #contentArea {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      padding: 24px;
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    }
+    #contentArea.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Hero banner ── */
+    .hero-banner {
+      background: linear-gradient(135deg, #1B3A8C 0%, #0A1628 100%);
+      border-radius: 16px; padding: 28px 32px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 24px; overflow: hidden; position: relative;
+    }
+
+    /* ── Vitals cards ── */
+    .vital-card {
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 12px; padding: 14px 18px;
+      min-width: 140px;
+    }
+
+    /* ── Service cards grid ── */
+    .service-grid {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      gap: 16px; margin-bottom: 24px;
+    }
+    .service-card {
+      background: #FFFFFF; border-radius: 16px;
+      border: 1px solid #E5E7EB; padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+      cursor: pointer;
+    }
+    .service-card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+    .service-icon-wrap {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Bottom 3-col grid ── */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 240px 1fr;
+      gap: 16px; margin-bottom: 24px;
+    }
+
+    /* ── White card ── */
+    .white-card {
+      background: #FFFFFF; border-radius: 16px;
+      border: 1px solid #E5E7EB; padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    /* ── Bar chart ── */
+    .bar-chart { display: flex; align-items: flex-end; gap: 10px; height: 120px; }
+    .bar-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+    .bar {
+      width: 100%; border-radius: 6px 6px 0 0;
+      transform-origin: bottom center;
+      transform: scaleY(0);
+      transition: transform 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .bar.grow { transform: scaleY(1); }
+    .bar-label { font-size: 10px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* ── Assistance card ── */
+    .assist-card {
+      background: linear-gradient(160deg, #C44215 0%, #D94E1F 50%, #E8622D 100%);
+      border-radius: 20px; padding: 28px 24px;
+      min-height: 280px; display: flex; flex-direction: column;
+      justify-content: space-between; align-items: center; text-align: center;
+    }
+    .assist-icon-wrap {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chat-btn {
+      width: 100%; background: #fff; color: #D94E1F;
+      border: none; border-radius: 24px; padding: 10px 20px;
+      font-family: inherit; font-size: 13px; font-weight: 700;
+      cursor: pointer; margin-top: 16px;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .chat-btn:hover { background: rgba(255,255,255,0.9); transform: scale(1.02); }
+
+    /* ── Reminder items ── */
+    .reminder-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #F3F4F6;
+    }
+    .reminder-item:last-child { border-bottom: none; }
+    .reminder-icon-wrap {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .reminder-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Footer ── */
+    #footerBar {
+      background: #FFFFFF; border-top: 1px solid #E5E7EB;
+      padding: 14px 28px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Pulse animation (footer status dot) ── */
+    @keyframes statusPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+    .status-dot { animation: statusPulse 2s ease-in-out infinite; }
+
+    /* ── Emergency / Chat button ── */
+    #emergencyBtn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: calc(100% - 24px); height: 44px; border-radius: 12px;
+      background: #D94E1F; border: none; color: #fff;
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      margin: 0 12px 20px;
+    }
+    #emergencyBtn:hover {
+      background: #B8401A; transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(217,78,31,0.35);
+    }
+
+    /* ── Modal overlay ── */
+    #chatModal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(10,22,40,0.55); z-index: 999;
+      align-items: center; justify-content: center;
+    }
+    #chatModal.open { display: flex; }
+    .modal-card {
+      background: #fff; border-radius: 20px; padding: 36px 32px;
+      max-width: 360px; width: 90%; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+      animation: fadeInUp 0.3s ease;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .modal-spinner {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 3px solid #F3F4F6; border-top-color: #D94E1F;
+      animation: spin 0.8s linear infinite; margin: 16px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .modal-close-btn {
+      margin-top: 20px; padding: 8px 20px; border-radius: 8px;
+      background: #F3F4F6; border: none; color: #374151;
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .modal-close-btn:hover { background: #E5E7EB; }
+
+    /* ── Hamburger (mobile only) ── */
+    #hamburger {
+      display: none; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 8px;
+      background: none; border: none; cursor: pointer;
+      color: #374151; margin-right: 8px; flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    #hamburger:hover { background: #F3F4F6; }
+
+    .whatsapp-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: calc(100% - 32px);
+      margin: 0 16px 20px 16px;
+      padding: 13px 16px;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      box-shadow: 0 4px 15px rgba(37,211,102,0.35),
+                  0 2px 6px rgba(37,211,102,0.2);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .whatsapp-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255,255,255,0.15), 
+        transparent);
+      transition: left 0.4s ease;
+    }
+
+    .whatsapp-btn:hover::before { left: 100%; }
+
+    .whatsapp-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37,211,102,0.45),
+                  0 3px 8px rgba(37,211,102,0.25);
+      background: linear-gradient(135deg, #2de070, #15a085);
+    }
+
+    .whatsapp-btn:active {
+      transform: translateY(0px);
+      box-shadow: 0 2px 8px rgba(37,211,102,0.3);
+    }
+
+    /* Pulse ring on load */
+    .whatsapp-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      box-shadow: 0 0 0 0 rgba(37,211,102,0.5);
+      animation: wa-pulse 2.5s ease-out infinite;
+    }
+
+    @keyframes wa-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(37,211,102,0.4); }
+      70%  { box-shadow: 0 0 0 10px rgba(37,211,102,0); }
+      100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      #sidebar { width: 64px; min-width: 64px; }
+      #sidebar .nav-label, #sidebar .logo-text,
+      #sidebar .sidebar-bottom-label, #sidebar #emergencyText { display: none; }
+      #sidebar .nav-item { justify-content: center; padding-left: 0; padding-right: 0; }
+      #sidebar .logo-block { justify-content: center; padding: 0 12px; }
+      #sidebar #emergencyBtn { width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: 50%; margin: 0 auto 20px; }
+      .service-grid { grid-template-columns: repeat(2,1fr); }
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      #sidebar { position: fixed; left: -220px; width: 220px; min-width: 220px; transition: left 0.25s ease; }
+      #sidebar.mob-open { left: 0; }
+      #sidebar .nav-label, #sidebar .logo-text,
+      #sidebar .sidebar-bottom-label, #sidebar #emergencyText { display: block; }
+      #sidebar .nav-item { justify-content: flex-start; padding: 10px 12px; }
+      #sidebar .logo-block { justify-content: flex-start; padding: 0 20px; }
+      #sidebar #emergencyBtn { width: calc(100% - 24px); height: 44px; padding: 0 12px; border-radius: 12px; margin: 0 12px 20px; }
+      #hamburger { display: flex; }
+      .search-wrap { width: 180px; }
+      .service-grid { grid-template-columns: repeat(2,1fr); }
+      .bottom-grid { grid-template-columns: 1fr; }
+      .hero-banner { flex-direction: column; gap: 16px; align-items: flex-start; }
+      #contentArea { padding: 16px; }
+      #topNav { padding: 0 16px; }
+    }
+    @media (max-width: 480px) {
+      .search-wrap { width: 140px; }
+      .vitals-row { flex-direction: column; gap: 8px; width: 100%; }
+      .service-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════ CHAT MODAL ════════════ -->
+<div id="chatModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#D94E1F,#F97316);display:flex;align-items:center;justify-content:center;margin:0 auto;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 17H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-4l-4 4-4-4z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="modal-spinner"></div>
+    <h3 id="modalTitle" style="font-size:17px;font-weight:700;color:#0A1628;">Connecting to Support</h3>
+    <p style="font-size:13px;color:#6B7280;margin-top:8px;">Reaching our 24/7 medical concierge team...</p>
+    <button class="modal-close-btn" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- ════════════ APP SHELL ════════════ -->
+<div id="appShell">
+
+  <!-- ── Sidebar Overlay (mobile) ── -->
+  <div id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+
+  <!-- ════════════ SIDEBAR ════════════ -->
+  <aside id="sidebar" aria-label="Main navigation">
+
+    <!-- Logo block -->
+    <div class="logo-block" style="display:flex;align-items:center;gap:10px;padding:20px 20px 0;margin-bottom:20px;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;" aria-hidden="true">
+        <rect x="10" y="2" width="4" height="20" rx="2" fill="#1B3A8C"/>
+        <rect x="2" y="10" width="20" height="4" rx="2" fill="#1B3A8C"/>
+      </svg>
+      <div class="logo-text">
+        <div style="font-size:12px;color:#6B7280;font-weight:400;line-height:1.2;">The Clinical</div>
+        <div style="font-size:13px;color:#0A1628;font-weight:700;line-height:1.2;">Boutique</div>
+        <div style="font-size:9px;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.08em;line-height:1.3;margin-top:2px;">Medical Concierge</div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div style="height:1px;background:#E5E7EB;margin:0 12px 16px;"></div>
+
+    <!-- Nav items -->
+    <nav style="padding:0 0 0 0;display:flex;flex-direction:column;gap:4px;flex:1;" aria-label="Sidebar navigation">
+
+      <!-- Dashboard (active) -->
+      <div class="nav-item active" id="nav-dashboard" onclick="setActive('nav-dashboard')" role="button" tabindex="0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor"/>
+          <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor"/>
+        </svg>
+        <span class="nav-label">Dashboard</span>
+      </div>
+
+      <!-- Symptoms -->
+      <div class="nav-item" id="nav-symptoms" onclick="window.location.href='symptoms.html'" role="button" tabindex="0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          <path d="M20 20l-2.5-2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M11 8v6M8 11h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <span class="nav-label">Symptoms</span>
+      </div>
+
+      <!-- Medicines -->
+      <div class="nav-item" id="nav-medicines" onclick="window.location.href='pharmacy-concierge.html'" role="button" tabindex="0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;" aria-hidden="true">
+          <rect x="3" y="9" width="8" height="13" rx="4" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          <rect x="13" y="2" width="8" height="13" rx="4" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          <line x1="3" y1="15.5" x2="11" y2="15.5" stroke="currentColor" stroke-width="1.8"/>
+          <line x1="13" y1="8.5" x2="21" y2="8.5" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+        <span class="nav-label">Medicines</span>
+      </div>
+
+      <!-- Diet -->
+      <div class="nav-item" id="nav-diet" onclick="setActive('nav-diet')" role="button" tabindex="0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;" aria-hidden="true">
+          <path d="M3 2v7c0 3.31 2.69 6 6 6v7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M9 2v7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M6 2v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M15 2c0 0 4 2.5 4 7s-4 7-4 7v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="nav-label">Diet</span>
+      </div>
+
+      <!-- Hospitals -->
+      <div class="nav-item" id="nav-hospitals" onclick="setActive('nav-hospitals')" role="button" tabindex="0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;" aria-hidden="true">
+          <path d="M3 21h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <rect x="4" y="6" width="16" height="15" rx="1" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          <path d="M12 3v3M10.5 3H13.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <rect x="10" y="11" width="4" height="10" rx="0.5" fill="currentColor" fill-opacity="0.25"/>
+          <path d="M10 11h4M10 21v-10" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10.5 15h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M12 13v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="nav-label">Hospitals</span>
+      </div>
+
+    </nav>
+
+    <!-- Spacer -->
+    <div style="flex:1;"></div>
+
+    <!-- WhatsApp Share button -->
+    <button class="whatsapp-btn" onclick="sendWhatsApp()" id="waBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099
+        -.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223
+        -.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761
+        -1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446
+        -.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075
+        -.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008
+        -.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04
+        2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487
+        .709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085
+        1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124
+        -.272-.198-.57-.347z"/>
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.556 4.111 1.523 5.836
+        L.057 23.857l6.197-1.427A11.945 11.945 0 0012 24c6.627 0 12-5.373
+        12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.366l-.36-.214
+        -3.68.847.874-3.583-.234-.368A9.818 9.818 0 012.182 12C2.182 6.57
+        6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+      </svg>
+      Share on WhatsApp
+    </button>
+
+  </aside>
+  <!-- /SIDEBAR -->
+
+  <!-- ════════════ MAIN AREA ════════════ -->
+  <main id="mainArea">
+
+    <!-- ── Top Navbar ── -->
+    <header id="topNav">
+
+      <!-- Hamburger (mobile) -->
+      <button id="hamburger" onclick="toggleMobileSidebar()" aria-label="Open navigation menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <!-- Search -->
+      <div class="search-wrap">
+        <span class="search-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="11" cy="11" r="7" stroke="#9CA3AF" stroke-width="1.8"/>
+            <path d="M20 20l-2.5-2.5" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <input type="search" placeholder="Search clinical records..." aria-label="Search clinical records" />
+      </div>
+
+      <!-- Right section -->
+      <div style="display:flex;align-items:center;gap:16px;">
+
+        <!-- Bell -->
+        <div class="bell-wrap">
+          <button class="bell-btn" id="bellBtn" onclick="toggleBell(event)" aria-label="Notifications" aria-haspopup="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="bell-badge" aria-hidden="true"></span>
+          </button>
+          <div class="bell-dropdown" id="bellDropdown" role="tooltip">
+            <span style="font-size:14px;font-weight:600;color:#0A1628;">3 New Notifications</span>
+            <p>You have unread clinical alerts</p>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div style="width:1px;height:28px;background:#E5E7EB;" aria-hidden="true"></div>
+
+        <!-- Profile -->
+        <div style="display:flex;align-items:center;gap:10px;cursor:pointer;" aria-label="User profile" onclick="logoutUser()" title="Click to sign out">
+          <div style="text-align:right;">
+            <div data-user-name style="font-size:14px;font-weight:600;color:#0A1628;line-height:1.2;">Dr. Julian Vance</div>
+            <div style="font-size:12px;color:#9CA3AF;line-height:1.2;">Chief Resident</div>
+          </div>
+          <div data-user-avatar class="avatar" aria-hidden="true">JV</div>
+        </div>
+
+      </div>
+    </header>
+    <!-- /TOPNAV -->
+
+    <!-- ── Scrollable Content ── -->
+    <div id="contentArea">
+
+      <!-- ════ HERO BANNER ════ -->
+      <section class="hero-banner" aria-labelledby="heroHeading">
+        <div>
+          <h1 id="heroHeading" style="font-size:clamp(28px,3.5vw,40px);font-weight:800;color:#FFFFFF;line-height:1.2;">
+            How are you feeling today?
+          </h1>
+          <p style="font-size:15px;color:rgba(255,255,255,0.65);margin-top:6px;">
+            Track your daily vitals and upcoming clinical appointments.
+          </p>
+        </div>
+
+        <div class="vitals-row" style="display:flex;gap:12px;" aria-label="Vital statistics">
+          <!-- Heart Rate Card -->
+          <div class="vital-card">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" fill="#EF4444"/>
+              </svg>
+              <span style="font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:#CBD5E1;font-weight:600;">Heart Rate</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:4px;">
+              <span style="font-size:28px;font-weight:800;color:#FFFFFF;">72</span>
+              <span style="font-size:11px;color:#94A3B8;font-weight:500;">BPM</span>
+            </div>
+          </div>
+
+          <!-- Steps Card -->
+          <div class="vital-card">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M13 4.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" fill="#60A5FA"/>
+                <path d="M12.5 8l-2 5h4l1.5 6" stroke="#60A5FA" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <path d="M10.5 13l-3.5 6" stroke="#60A5FA" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+              </svg>
+              <span style="font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:#CBD5E1;font-weight:600;">Steps</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:4px;">
+              <span style="font-size:28px;font-weight:800;color:#FFFFFF;">4,281</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ SERVICE CARDS ════ -->
+      <section class="service-grid" aria-label="Clinical services">
+
+        <!-- Symptoms -->
+        <article class="service-card">
+          <div class="service-icon-wrap" style="background:#E0F2FE;" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="11" cy="11" r="7" stroke="#0EA5E9" stroke-width="1.8" fill="none"/>
+              <path d="M20 20l-2.5-2.5" stroke="#0EA5E9" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M11 8v6M8 11h6" stroke="#0EA5E9" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 style="font-size:16px;font-weight:700;color:#0A1628;margin-top:16px;">Symptoms</h3>
+          <p style="font-size:13px;color:#6B7280;line-height:1.5;margin-top:4px;">Log and track physical changes.</p>
+          <a href="symptoms.html" style="display:inline-block;margin-top:16px;font-size:13px;font-weight:600;color:#0EA5E9;text-decoration:none;"
+             onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Track Now →</a>
+        </article>
+
+        <!-- Medicines -->
+        <article class="service-card">
+          <div class="service-icon-wrap" style="background:#D1FAE5;" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="9" width="8" height="13" rx="4" stroke="#10B981" stroke-width="1.8" fill="none"/>
+              <rect x="13" y="2" width="8" height="13" rx="4" stroke="#10B981" stroke-width="1.8" fill="none"/>
+              <line x1="3" y1="15.5" x2="11" y2="15.5" stroke="#10B981" stroke-width="1.8"/>
+              <line x1="13" y1="8.5" x2="21" y2="8.5" stroke="#10B981" stroke-width="1.8"/>
+            </svg>
+          </div>
+          <h3 style="font-size:16px;font-weight:700;color:#0A1628;margin-top:16px;">Medicines</h3>
+          <p style="font-size:13px;color:#6B7280;line-height:1.5;margin-top:4px;">Manage your prescriptions.</p>
+          <a href="pharmacy-concierge.html" style="display:inline-block;margin-top:16px;font-size:13px;font-weight:600;color:#10B981;text-decoration:none;"
+             onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View Refills →</a>
+        </article>
+
+        <!-- Diet -->
+        <article class="service-card">
+          <div class="service-icon-wrap" style="background:#FFEDD5;" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 2v7c0 3.31 2.69 6 6 6v7" stroke="#F97316" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M9 2v7" stroke="#F97316" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M6 2v4" stroke="#F97316" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M15 2c0 0 4 2.5 4 7s-4 7-4 7v6" stroke="#F97316" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 style="font-size:16px;font-weight:700;color:#0A1628;margin-top:16px;">Diet</h3>
+          <p style="font-size:13px;color:#6B7280;line-height:1.5;margin-top:4px;">Nutritional goals and plans.</p>
+          <a href="diet.html" target="_blank" style="display:inline-block;margin-top:16px;font-size:13px;font-weight:600;color:#F97316;text-decoration:none;"
+             onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Open Plan →</a>
+        </article>
+
+        <!-- Hospitals -->
+        <article class="service-card">
+          <div class="service-icon-wrap" style="background:#EDE9FE;" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1118 0z" stroke="#8B5CF6" stroke-width="1.8" fill="none"/>
+              <circle cx="12" cy="10" r="3" stroke="#8B5CF6" stroke-width="1.8" fill="none"/>
+            </svg>
+          </div>
+          <h3 style="font-size:16px;font-weight:700;color:#0A1628;margin-top:16px;">Hospitals</h3>
+          <p style="font-size:13px;color:#6B7280;line-height:1.5;margin-top:4px;">Find nearby care facilities.</p>
+          <a href="hospitals.html" target="_blank" style="display:inline-block;margin-top:16px;font-size:13px;font-weight:600;color:#8B5CF6;text-decoration:none;"
+             onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Locate Care →</a>
+        </article>
+
+      </section>
+
+      <!-- ════ BOTTOM 3-COL GRID ════ -->
+      <section class="bottom-grid" aria-label="Activity overview">
+
+        <!-- COL 1: Weekly Trends -->
+        <div class="white-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h2 style="font-size:16px;font-weight:700;color:#0A1628;">Weekly Trends</h2>
+            <span style="font-size:12px;color:#6B7280;background:#F3F4F6;padding:4px 10px;border-radius:999px;">Activity</span>
+          </div>
+
+          <div class="bar-chart" id="barChart" aria-label="Weekly activity bar chart">
+            <!-- MON -->
+            <div class="bar-col">
+              <div class="bar" data-height="35" style="height:42px;background:#93C5FD;"></div>
+              <span class="bar-label">Mon</span>
+            </div>
+            <!-- TUE -->
+            <div class="bar-col">
+              <div class="bar" data-height="50" style="height:60px;background:#93C5FD;"></div>
+              <span class="bar-label">Tue</span>
+            </div>
+            <!-- WED -->
+            <div class="bar-col">
+              <div class="bar" data-height="45" style="height:54px;background:#93C5FD;"></div>
+              <span class="bar-label">Wed</span>
+            </div>
+            <!-- THU -->
+            <div class="bar-col">
+              <div class="bar" data-height="55" style="height:66px;background:#93C5FD;"></div>
+              <span class="bar-label">Thu</span>
+            </div>
+            <!-- FRI -->
+            <div class="bar-col">
+              <div class="bar" data-height="60" style="height:72px;background:#93C5FD;"></div>
+              <span class="bar-label">Fri</span>
+            </div>
+            <!-- SAT -->
+            <div class="bar-col">
+              <div class="bar" data-height="80" style="height:96px;background:#1B3A8C;"></div>
+              <span class="bar-label">Sat</span>
+            </div>
+            <!-- SUN -->
+            <div class="bar-col">
+              <div class="bar" data-height="90" style="height:108px;background:#1B3A8C;"></div>
+              <span class="bar-label">Sun</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- COL 2: Assistance Card -->
+        <div class="assist-card" role="complementary" aria-label="Medical assistance">
+          <div class="assist-icon-wrap" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 17H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-4l-4 4-4-4z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              <circle cx="9" cy="9" r="1" fill="white"/>
+              <circle cx="12" cy="9" r="1" fill="white"/>
+              <circle cx="15" cy="9" r="1" fill="white"/>
+            </svg>
+          </div>
+          <div>
+            <h3 style="font-size:18px;font-weight:800;color:#FFFFFF;line-height:1.3;margin-top:12px;">Need immediate assistance?</h3>
+            <p style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:8px;line-height:1.6;">
+              Connect with our 24/7 medical concierge team instantly.
+            </p>
+          </div>
+          <button class="chat-btn" onclick="openModal()">Start Chat Now ⚡</button>
+        </div>
+
+        <!-- COL 3: Upcoming Reminders -->
+        <div class="white-card">
+          <h2 style="font-size:16px;font-weight:700;color:#0A1628;margin-bottom:16px;">Upcoming Reminders</h2>
+
+          <!-- Multivitamin -->
+          <div class="reminder-item">
+            <div class="reminder-icon-wrap" style="background:#D1FAE5;" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="9" width="8" height="13" rx="4" stroke="#10B981" stroke-width="1.8" fill="none"/>
+                <rect x="13" y="2" width="8" height="13" rx="4" stroke="#10B981" stroke-width="1.8" fill="none"/>
+                <line x1="3" y1="15.5" x2="11" y2="15.5" stroke="#10B981" stroke-width="1.8"/>
+                <line x1="13" y1="8.5" x2="21" y2="8.5" stroke="#10B981" stroke-width="1.8"/>
+              </svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:#0A1628;">Multivitamin</div>
+              <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">After Breakfast • 09:00 AM</div>
+            </div>
+            <div class="reminder-dot status-dot" style="background:#10B981;" aria-label="Active"></div>
+          </div>
+
+          <!-- Video Consult -->
+          <div class="reminder-item">
+            <div class="reminder-icon-wrap" style="background:#E0F2FE;" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="6" width="14" height="12" rx="2" stroke="#0EA5E9" stroke-width="1.8" fill="none"/>
+                <path d="M16 10l5-3v10l-5-3V10z" stroke="#0EA5E9" stroke-width="1.8" stroke-linejoin="round" fill="none"/>
+              </svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:#0A1628;">Video Consult</div>
+              <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">Dr. Sarah West • 02:30 PM</div>
+            </div>
+            <div class="reminder-dot" style="background:#9CA3AF;" aria-label="Upcoming"></div>
+          </div>
+
+          <!-- Light Cardio -->
+          <div class="reminder-item">
+            <div class="reminder-icon-wrap" style="background:#FFEDD5;" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="#F97316" stroke-width="1.8" fill="none"/>
+              </svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:#0A1628;">Light Cardio</div>
+              <a href="#" style="font-size:12px;color:#1B3A8C;font-weight:600;text-decoration:none;display:inline-block;margin-top:2px;"
+                 onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View Calendar</a>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ════ FOOTER ════ -->
+      <footer id="footerBar" role="contentinfo">
+        <nav aria-label="Footer links" style="display:flex;gap:24px;">
+          <a href="#" style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#9CA3AF;text-decoration:none;transition:color 0.15s;"
+             onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#9CA3AF'">Privacy Protocol</a>
+          <a href="#" style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#9CA3AF;text-decoration:none;transition:color 0.15s;"
+             onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#9CA3AF'">Data Security</a>
+          <a href="#" style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#9CA3AF;text-decoration:none;transition:color 0.15s;"
+             onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#9CA3AF'">Support Center</a>
+        </nav>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div class="status-dot" style="width:8px;height:8px;border-radius:50%;background:#10B981;" aria-hidden="true"></div>
+          <span style="font-size:11px;color:#6B7280;">Clinical Server Status: Operational</span>
+        </div>
+      </footer>
+
+    </div>
+    <!-- /contentArea -->
+
+  </main>
+  <!-- /MAIN AREA -->
+
+</div>
+<!-- /APP SHELL -->
+
+<script>
+  // ── Page load animation
+  window.addEventListener('load', () => {
+    const content = document.getElementById('contentArea');
+    requestAnimationFrame(() => {
+      content.classList.add('visible');
+    });
+  });
+
+  // ── Bar chart grow animation (staggered)
+  document.addEventListener('DOMContentLoaded', () => {
+    const bars = document.querySelectorAll('#barChart .bar');
+    bars.forEach((bar, i) => {
+      setTimeout(() => { bar.classList.add('grow'); }, 200 + i * 100);
+    });
+  });
+
+  // ── Sidebar nav active state
+  function setActive(id) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const target = document.getElementById(id);
+    if (target) target.classList.add('active');
+    // Close mobile sidebar on nav click
+    if (window.innerWidth < 768) closeMobileSidebar();
+  }
+
+  // ── Mobile sidebar toggle
+  function toggleMobileSidebar() {
+    const sb = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sb.classList.toggle('mob-open');
+    overlay.classList.toggle('visible');
+  }
+  function closeMobileSidebar() {
+    document.getElementById('sidebar').classList.remove('mob-open');
+    document.getElementById('sidebarOverlay').classList.remove('visible');
+  }
+
+  // ── Bell notification dropdown
+  function toggleBell(e) {
+    e.stopPropagation();
+    const dd = document.getElementById('bellDropdown');
+    dd.classList.toggle('open');
+  }
+  document.addEventListener('click', (e) => {
+    const dd = document.getElementById('bellDropdown');
+    const bellBtn = document.getElementById('bellBtn');
+    if (!bellBtn.contains(e.target)) {
+      dd.classList.remove('open');
+    }
+  });
+
+  // ── Emergency / Chat modal
+  function openModal() {
+    document.getElementById('chatModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('chatModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  // Close modal on backdrop click
+  document.getElementById('chatModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  // Close modal on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // ── Keyboard accessibility for nav items
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        item.click();
+      }
+    });
+  });
+
+  function sendWhatsApp() {
+    // User data - pull from your app's user session/state
+    const userName    = "Anurag Yadav";
+    const userRole    = "Chief Resident";
+    const heartRate   = document.getElementById('heartRateValue')?.innerText || "72";
+    const steps       = document.getElementById('stepsValue')?.innerText || "4,281";
+    const currentDate = new Date().toLocaleDateString('en-IN', { 
+      day: 'numeric', month: 'long', year: 'numeric' 
+    });
+    const currentTime = new Date().toLocaleTimeString('en-IN', { 
+      hour: '2-digit', minute: '2-digit' 
+    });
+
+    // Build the message
+    const message = 
+`🏥 *Clinical Boutique – Health Summary*
+━━━━━━━━━━━━━━━━━━━━
+👤 *Patient:* ${userName}
+🎯 *Role:* ${userRole}
+📅 *Date:* ${currentDate}
+🕐 *Time:* ${currentTime}
+━━━━━━━━━━━━━━━━━━━━
+❤️ *Heart Rate:* ${heartRate} BPM
+👟 *Steps Today:* ${steps}
+━━━━━━━━━━━━━━━━━━━━
+📋 *Active Reminders:*
+- Multivitamin – After Breakfast (09:00 AM)
+- Video Consult – Dr. Sarah West (02:30 PM)
+- Light Cardio – View Calendar
+━━━━━━━━━━━━━━━━━━━━
+🔗 Sent via Clinical Boutique App
+_This is an automated health summary._`;
+
+    // Your WhatsApp number (with country code, no + or spaces)
+    // Replace 919999999999 with actual number
+    const phoneNumber = "919999999999";
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    
+    window.open(whatsappURL, '_blank');
+  }
+</script>
+<script src="dashboard-auth-patch.js"></script>
+</body>
+</html>

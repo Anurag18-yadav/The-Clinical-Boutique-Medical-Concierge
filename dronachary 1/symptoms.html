@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Symptoms Checker – Clinical Boutique Premium Concierge</title>
+  <meta name="description" content="AI-powered symptom checker for Clinical Boutique Premium Concierge members."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:#0f1b2d; --navy-light:#1a2d4a; --blue-active:#2563eb;
+      --orange:#c2410c; --orange-bright:#ea580c; --bg:#f0f4f8;
+      --white:#ffffff; --text-primary:#0f1b2d; --text-gray:#64748b;
+      --green:#16a34a; --red-urgent:#dc2626;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-primary);display:flex;height:100vh;overflow:hidden;}
+
+    /* ─── SIDEBAR ─── */
+    .sidebar{width:220px;min-width:220px;background:var(--navy);display:flex;flex-direction:column;justify-content:space-between;height:100vh;color:var(--white);z-index:50;}
+    .sidebar-top{padding:24px 16px;}
+    .logo-wrap{margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .logo-icon{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+    .logo-cross{width:28px;height:28px;background:var(--blue-active);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+    .logo-text{font-size:15px;font-weight:700;line-height:1.2;}
+    .logo-sub{font-size:9px;font-weight:700;letter-spacing:1.5px;color:#64748b;text-transform:uppercase;}
+    .nav-items{display:flex;flex-direction:column;gap:4px;}
+    .nav-item{padding:10px 12px;border-radius:8px;display:flex;align-items:center;gap:10px;color:#94a3b8;font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;transition:all .2s;border-left:3px solid transparent;}
+    .nav-item:hover{color:var(--white);background:rgba(255,255,255,.05);}
+    .nav-item.active{color:var(--white);background:rgba(37,99,235,.15);border-left-color:var(--blue-active);border-radius:0 8px 8px 0;}
+    .sidebar-bottom{padding:16px;border-top:1px solid rgba(255,255,255,.1);}
+    .user-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+    .u-avatar{width:34px;height:34px;border-radius:50%;background:var(--blue-active);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
+    .u-name{font-size:12px;font-weight:600;}
+    .u-status{font-size:10px;color:#fbbf24;}
+    .btn-emergency{width:100%;padding:9px;background:rgba(220,38,38,.1);border:1px solid var(--red-urgent);color:#ef4444;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;font-family:'Inter',sans-serif;animation:pulse-red 2s infinite;}
+    .btn-emergency:hover{background:var(--red-urgent);color:#fff;}
+
+    /* ─── MAIN WRAPPER ─── */
+    .main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0;position:relative;}
+
+    /* ─── TOP NAVBAR ─── */
+    .top-navbar{height:60px;background:var(--white);display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid #e2e8f0;z-index:40;flex-shrink:0;}
+    .nav-left{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:var(--navy);}
+    .search-wrap{position:relative;}
+    .search-wrap input{width:280px;padding:8px 14px 8px 34px;border:1px solid #e2e8f0;border-radius:20px;font-size:13px;font-family:'Inter',sans-serif;outline:none;background:#f8fafc;transition:border-color .2s;}
+    .search-wrap input:focus{border-color:var(--blue-active);}
+    .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8;}
+    .nav-right{display:flex;align-items:center;gap:14px;}
+    .nav-icon{color:#64748b;cursor:pointer;transition:color .2s;}
+    .nav-icon:hover{color:var(--navy);}
+    .nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+
+    /* ─── MAIN SCROLL ─── */
+    .main-scroll{flex:1;overflow-y:auto;padding:20px 24px 90px;scroll-behavior:smooth;}
+
+    /* ─── HERO BANNER ─── */
+    .hero-banner{background:linear-gradient(135deg,#0f1b2d 0%,#1a2d4a 60%,#1e3a5e 100%);border-radius:16px;padding:32px;display:flex;justify-content:space-between;align-items:center;color:var(--white);position:relative;overflow:hidden;margin-bottom:20px;box-shadow:0 4px 24px rgba(15,27,45,.2);}
+    .hero-content{position:relative;z-index:2;max-width:560px;}
+    .pill-badge{display:inline-block;background:rgba(20,184,166,.2);color:#2dd4bf;padding:4px 10px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:12px;border:1px solid rgba(45,212,191,.3);}
+    .hero-h1{font-size:26px;font-weight:800;margin-bottom:8px;line-height:1.3;}
+    .hero-sub{color:#94a3b8;font-size:14px;margin-bottom:22px;line-height:1.6;}
+    .hero-btns{display:flex;gap:12px;}
+    .btn{padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;border:none;font-family:'Inter',sans-serif;}
+    .btn:hover{transform:translateY(-2px);}
+    .btn-well{background:transparent;border:1.5px solid rgba(255,255,255,.3);color:var(--white);}
+    .btn-well:hover{background:rgba(255,255,255,.1);border-color:var(--white);box-shadow:0 4px 12px rgba(255,255,255,.1);}
+    .btn-not-well{background:var(--orange);color:var(--white);}
+    .btn-not-well:hover{background:var(--orange-bright);box-shadow:0 4px 14px rgba(194,65,12,.4);}
+    .success-msg{display:none;margin-top:14px;padding:14px;background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.4);border-radius:10px;color:#4ade80;font-weight:500;font-size:13px;align-items:center;gap:8px;animation:fadeSlide .4s ease;}
+    .hero-art{position:absolute;right:0;top:0;bottom:0;width:38%;display:flex;align-items:center;justify-content:flex-end;padding-right:28px;pointer-events:none;}
+
+    /* ─── CARD ─── */
+    .card{background:var(--white);border-radius:16px;padding:22px;box-shadow:0 2px 12px rgba(0,0,0,.05);}
+
+    /* ─── SECTION B ─── */
+    .section-b{gap:20px;margin-bottom:20px;display:none;opacity:0;transform:translateY(12px);transition:opacity .35s,transform .35s;}
+    .section-b.visible{display:flex;opacity:1;transform:translateY(0);}
+    .left-panel{flex:0 0 68%;}
+    .right-panel{flex:1;}
+
+    .step-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .step-title{font-size:17px;font-weight:700;}
+    .step-badge{font-size:11px;font-weight:700;color:var(--orange);background:#fff7ed;padding:4px 10px;border-radius:10px;}
+    .prog-wrap{height:6px;background:#e2e8f0;border-radius:3px;margin-bottom:20px;overflow:hidden;}
+    .prog-bar{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange-bright));border-radius:3px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+
+    /* Symptom Grid */
+    .symptom-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+    .symptom-card{border:2px solid transparent;border-radius:12px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:all .2s;background:var(--white);box-shadow:0 2px 8px rgba(0,0,0,.04);text-align:center;}
+    .symptom-card:hover{transform:scale(1.03);box-shadow:0 6px 20px rgba(0,0,0,.08);}
+    .symptom-card.active{border-color:var(--blue-active);box-shadow:0 4px 20px rgba(37,99,235,.18);transform:translateY(-2px);}
+    .sc-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .2s;}
+    .sc-name{font-size:13px;font-weight:600;color:var(--text-primary);}
+    .symptom-card.active .sc-name{color:var(--blue-active);}
+    .symptom-card.active .sc-icon{background:var(--blue-active)!important;color:#fff!important;}
+    .bg-orange{background:#fff7ed;color:#ea580c;}
+    .bg-blue{background:#eff6ff;color:#3b82f6;}
+    .bg-purple{background:#faf5ff;color:#a855f7;}
+    .bg-green{background:#f0fdf4;color:#22c55e;}
+    .bg-red{background:#fff1f2;color:#ef4444;}
+    .bg-yellow{background:#fefce8;color:#eab308;}
+    .bg-cyan{background:#ecfeff;color:#06b6d4;}
+    .bg-gray{background:#f8fafc;color:#64748b;}
+
+    /* Body Map */
+    .body-map-card{padding:18px;display:flex;flex-direction:column;}
+    .bm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+    .bm-title{font-size:15px;font-weight:600;}
+    .bm-toggle{display:flex;background:#f1f5f9;border-radius:20px;padding:3px;}
+    .bm-btn{padding:4px 12px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-gray);transition:all .2s;}
+    .bm-btn.active{background:var(--white);color:var(--navy);box-shadow:0 2px 6px rgba(0,0,0,.08);}
+    .body-container{background:#0a1628;border-radius:12px;position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden;padding:16px;min-height:300px;}
+    .body-svg{height:260px;filter:drop-shadow(0 0 10px rgba(45,212,191,.5));z-index:2;position:relative;}
+    .body-svg path{fill:transparent;stroke:#2dd4bf;stroke-width:1.8;cursor:pointer;transition:fill .2s;}
+    .body-svg path:hover{fill:rgba(45,212,191,.15);}
+    .heat-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(234,88,12,.5) 0%,transparent 70%);opacity:0;transition:opacity .6s;pointer-events:none;z-index:3;}
+    .heat-overlay.active{opacity:1;}
+    .body-dot{position:absolute;width:13px;height:13px;border-radius:50%;z-index:6;transform:translate(-50%,-50%);}
+    .body-dot.red{background:#ef4444;animation:pulse-dot-red 2s infinite;}
+    .body-dot.blue{background:#3b82f6;animation:pulse-dot-blue 2s infinite;}
+    .zone-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px;}
+    .zone-chip{font-size:11px;padding:4px 10px;border-radius:10px;border-left:3px solid;background:#f8fafc;display:flex;align-items:center;gap:5px;font-weight:500;}
+    .zone-chip.red{border-left-color:#ef4444;}
+    .zone-chip.blue{border-left-color:#3b82f6;}
+
+    /* ─── SECTION C ─── */
+    .section-c{gap:20px;margin-bottom:20px;display:none;opacity:0;transform:translateY(12px);transition:opacity .35s,transform .35s;}
+    .section-c.visible{display:flex;opacity:1;transform:translateY(0);}
+    .chat-panel{flex:0 0 68%;}
+    .chat-history{display:flex;flex-direction:column;gap:20px;}
+    .chat-step{animation:fadeSlide .35s ease forwards;}
+    .chat-step.completed .chat-chips{display:none;}
+    .chat-bubble{background:var(--navy-light);color:var(--white);padding:14px 18px;border-radius:14px 14px 14px 4px;display:inline-flex;align-items:flex-start;gap:10px;max-width:82%;margin-bottom:12px;font-size:14px;line-height:1.55;}
+    .bot-av{width:26px;height:26px;border-radius:50%;background:var(--blue-active);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .chat-chips{display:flex;flex-wrap:wrap;gap:10px;margin-left:36px;}
+    .chip{padding:7px 15px;border-radius:20px;border:1.5px solid #cbd5e1;background:var(--white);color:var(--text-primary);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+    .chip:hover{border-color:var(--blue-active);color:var(--blue-active);background:#eff6ff;}
+    .chip.selected{background:var(--blue-active);color:var(--white);border-color:var(--blue-active);}
+    .user-ans{margin-left:36px;margin-top:-4px;margin-bottom:8px;background:#eff6ff;color:var(--blue-active);padding:5px 12px;border-radius:10px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px;}
+
+    .need-help-card{flex:1;background:var(--navy);color:var(--white);border-radius:20px;padding:22px;align-self:flex-start;position:sticky;top:0;}
+    .nh-icon{width:46px;height:46px;border-radius:50%;background:rgba(220,38,38,.15);display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:#ef4444;}
+    .nh-title{font-size:17px;font-weight:700;margin-bottom:6px;}
+    .nh-sub{font-size:12px;color:#94a3b8;margin-bottom:18px;line-height:1.55;}
+    .btn-talk{width:100%;padding:13px;background:var(--orange);color:#fff;border:none;border-radius:10px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;font-size:14px;}
+    .btn-talk:hover{background:var(--orange-bright);transform:scale(1.02);}
+
+    /* ─── SECTION D ─── */
+    .summary-card{display:none;opacity:0;transform:translateY(20px);transition:all .4s ease;margin-bottom:20px;padding:26px;}
+    .summary-card.visible{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:22px;opacity:1;transform:translateY(0);}
+    .col-div{border-right:1px solid #e2e8f0;padding-right:22px;}
+    .sum-label{font-size:11px;font-weight:700;color:var(--text-gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;}
+    .recap-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+    .recap-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:500;color:var(--navy);}
+    .recap-check{color:var(--green);flex-shrink:0;margin-top:1px;}
+    .urgency-badge{display:inline-flex;align-items:center;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.5px;margin-bottom:10px;gap:6px;}
+    .badge-red{background:#fef2f2;color:#dc2626;border:1px solid #fecaca;}
+    .badge-orange{background:#fff7ed;color:#ea580c;border:1px solid #fed7aa;}
+    .badge-green{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;}
+    .urgency-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+    .urgency-msg{font-size:13px;color:var(--text-gray);margin-bottom:18px;line-height:1.55;}
+    .sum-actions{display:flex;gap:10px;}
+    .btn-save{flex:1;padding:9px;background:#fff;border:1.5px solid var(--navy-light);color:var(--navy);border-radius:8px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;}
+    .btn-save:hover{background:#f8fafc;transform:scale(1.01);}
+    .btn-book{flex:1;padding:9px;background:var(--orange);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;}
+    .btn-book:hover{background:var(--orange-bright);transform:scale(1.01);}
+    .rec-item{font-size:13px;color:var(--navy);margin-bottom:10px;display:flex;align-items:flex-start;gap:8px;line-height:1.5;}
+    .rec-bullet{color:var(--orange);font-weight:700;flex-shrink:0;}
+
+    /* ─── BOTTOM BAR ─── */
+    .bottom-bar{position:absolute;bottom:0;left:0;right:0;height:68px;background:var(--white);box-shadow:0 -4px 14px rgba(0,0,0,.07);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:30;}
+    .bb-left{display:flex;align-items:center;gap:14px;}
+    .av-group{display:flex;}
+    .av-c{width:32px;height:32px;border-radius:50%;border:2px solid #fff;margin-left:-8px;background:#cbd5e1;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;overflow:hidden;}
+    .av-c:first-child{margin-left:0;}
+    .av-more{background:var(--green);color:#fff;}
+    .bb-info{display:flex;flex-direction:column;gap:3px;}
+    .bb-avail{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--green);}
+    .green-dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+    .doc-chips{display:flex;gap:7px;}
+    .doc-chip{font-size:12px;font-weight:600;color:var(--navy);background:#f1f5f9;padding:4px 10px;border-radius:10px;cursor:pointer;transition:all .2s;border:1.5px solid transparent;}
+    .doc-chip:hover{background:#e2e8f0;color:var(--blue-active);border-color:var(--blue-active);}
+    .rt-text{font-size:11px;color:var(--text-gray);}
+    .btn-priority{background:linear-gradient(180deg,#1e3a5e 0%,var(--navy) 100%);color:#fff;border:none;padding:11px 22px;border-radius:10px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;font-size:13px;box-shadow:0 4px 14px rgba(15,27,45,.35),inset 0 1px 0 rgba(255,255,255,.15);}
+    .btn-priority:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(15,27,45,.45),inset 0 1px 0 rgba(255,255,255,.15);}
+
+    /* ─── MIC FAB ─── */
+    .mic-fab{position:fixed;bottom:88px;right:22px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--orange-bright),var(--orange));color:#fff;border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(194,65,12,.45);cursor:pointer;transition:all .3s;z-index:50;animation:pulse-orange 2.5s infinite;}
+    .mic-fab:hover{transform:scale(1.07);}
+    .mic-fab.listening{background:var(--red-urgent);animation:pulse-red-fab 1s infinite;}
+    .speech-bub{position:fixed;bottom:155px;right:20px;background:var(--navy);color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s;z-index:51;max-width:200px;white-space:normal;}
+    .speech-bub.show{opacity:1;}
+    .speech-bub::after{content:'';position:absolute;bottom:-5px;right:20px;border-width:5px 5px 0;border-style:solid;border-color:var(--navy) transparent transparent;}
+
+    /* ─── MODAL ─── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(15,27,45,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .3s;}
+    .modal-overlay.open{opacity:1;pointer-events:auto;}
+    .modal{background:#fff;width:100%;max-width:420px;border-radius:20px;padding:30px;transform:scale(.94) translateY(12px);transition:transform .3s;box-shadow:0 12px 48px rgba(0,0,0,.22);}
+    .modal-overlay.open .modal{transform:scale(1) translateY(0);}
+    .modal-doc{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:22px;}
+    .modal-av{width:64px;height:64px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--blue-active);}
+    .modal-name{font-size:19px;font-weight:700;color:var(--navy);}
+    .modal-spec{font-size:13px;color:var(--text-gray);}
+    .modal-avail{background:#dcfce7;color:#166534;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:700;}
+    .modal-sec{margin-bottom:18px;}
+    .modal-lbl{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:.5px;display:block;margin-bottom:10px;}
+    .slot-row{display:flex;flex-wrap:wrap;gap:8px;}
+    .slot{padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+    .slot:hover{border-color:var(--blue-active);}
+    .slot.sel{background:var(--blue-active);color:#fff;border-color:var(--blue-active);}
+    .btn-confirm{width:100%;padding:14px;background:var(--orange);color:#fff;border:none;border-radius:10px;font-weight:700;font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;margin-bottom:10px;}
+    .btn-confirm:hover{background:var(--orange-bright);transform:scale(1.01);}
+    .btn-cancel-lnk{width:100%;border:none;background:transparent;font-size:13px;color:var(--text-gray);cursor:pointer;font-weight:500;font-family:'Inter',sans-serif;}
+    .btn-cancel-lnk:hover{color:var(--navy);}
+
+    /* ─── TOAST ─── */
+    .toast{position:fixed;top:20px;right:20px;background:var(--green);color:#fff;padding:14px 20px;border-radius:12px;font-weight:600;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 16px rgba(22,163,74,.35);transform:translateX(150%);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);z-index:2000;}
+    .toast.show{transform:translateX(0);}
+
+    /* ─── CONFETTI ─── */
+    .conf-p{position:fixed;pointer-events:none;z-index:9999;width:8px;height:8px;border-radius:2px;animation:conf-fall 1.3s ease forwards;}
+    @keyframes conf-fall{0%{opacity:1;transform:translateY(0) rotate(0deg);}100%{opacity:0;transform:translateY(140px) rotate(720deg);}}
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes pulse-red{0%{box-shadow:0 0 0 0 rgba(239,68,68,.4);}70%{box-shadow:0 0 0 7px rgba(239,68,68,0);}100%{box-shadow:0 0 0 0 rgba(239,68,68,0);}}
+    @keyframes pulse-dot-red{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6);}70%{box-shadow:0 0 0 10px rgba(239,68,68,0);}100%{box-shadow:0 0 0 0 rgba(239,68,68,0);}}
+    @keyframes pulse-dot-blue{0%{box-shadow:0 0 0 0 rgba(59,130,246,.6);}70%{box-shadow:0 0 0 10px rgba(59,130,246,0);}100%{box-shadow:0 0 0 0 rgba(59,130,246,0);}}
+    @keyframes pulse-orange{0%{box-shadow:0 0 0 0 rgba(194,65,12,.6);}70%{box-shadow:0 0 0 12px rgba(194,65,12,0);}100%{box-shadow:0 0 0 0 rgba(194,65,12,0);}}
+    @keyframes pulse-red-fab{0%{box-shadow:0 0 0 0 rgba(220,38,38,.7);}70%{box-shadow:0 0 0 14px rgba(220,38,38,0);}100%{box-shadow:0 0 0 0 rgba(220,38,38,0);}}
+    @keyframes fadeSlide{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes hb-pulse{0%,100%{opacity:.9;}50%{opacity:.3;}}
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-top">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <div class="logo-cross">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="10" y="2" width="4" height="20" rx="2" fill="#fff"/><rect x="2" y="10" width="20" height="4" rx="2" fill="#fff"/></svg>
+        </div>
+        <div>
+          <div class="logo-text">Clinical Boutique</div>
+          <div class="logo-sub">Premium Concierge</div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav-items">
+      <a href="dashboard.html" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="nav-item active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Symptoms
+      </a>
+      <a href="#" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Medical Records
+      </a>
+      <a href="#" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Appointments
+      </a>
+      <a href="#" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Concierge
+      </a>
+    </nav>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-row">
+      <div class="u-avatar">AS</div>
+      <div>
+        <div class="u-name">Anurag Sharma</div>
+        <div class="u-status">⭐ Premium Member</div>
+      </div>
+    </div>
+    <button class="btn-emergency" onclick="alert('Calling emergency services...')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      Emergency
+    </button>
+  </div>
+</aside>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div class="main-wrapper">
+
+  <!-- TOP NAVBAR -->
+  <nav class="top-navbar">
+    <div class="nav-left">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="10" y="2" width="4" height="20" rx="2" fill="var(--blue-active)"/><rect x="2" y="10" width="20" height="4" rx="2" fill="var(--blue-active)"/></svg>
+      The Clinical Boutique
+    </div>
+    <div class="search-wrap">
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search medical records..."/>
+    </div>
+    <div class="nav-right">
+      <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span style="font-weight:600;font-size:14px;">Anurag Yadav</span>
+      <div class="nav-avatar">AY</div>
+    </div>
+  </nav>
+
+  <!-- MAIN SCROLL -->
+  <main class="main-scroll" id="mainScroll">
+
+    <!-- ── SECTION A: HERO ── -->
+    <section class="hero-banner" id="sectionHero">
+      <div class="hero-content">
+        <div class="pill-badge">MEMBER WELCOME</div>
+        <h1 class="hero-h1">Hey Anurag, How are you feeling today?</h1>
+        <p class="hero-sub">Tell us your symptoms and our AI-Concierge will guide your care path.</p>
+        <div class="hero-btns">
+          <button class="btn btn-well" id="btnWell">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Feeling Well
+          </button>
+          <button class="btn btn-not-well" id="btnNotWell">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            Not Well
+          </button>
+        </div>
+        <div class="success-msg" id="msgWell">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Great! Keep up your healthy routine. See you at your next checkup!</span>
+        </div>
+      </div>
+      <div class="hero-art">
+        <svg width="100%" height="90" viewBox="0 0 320 90" fill="none">
+          <path d="M0 45 L60 45 L72 10 L92 80 L108 18 L128 55 L140 45 L320 45"
+            stroke="rgba(255,255,255,0.9)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+            style="filter:drop-shadow(0 0 6px rgba(255,255,255,0.7));animation:hb-pulse 2s infinite;"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ── SECTION B: SYMPTOM GRID + BODY MAP ── -->
+    <section class="section-b" id="sectionB">
+      <div class="left-panel">
+        <div class="card">
+          <div class="step-header">
+            <div class="step-title">What are you experiencing?</div>
+            <div class="step-badge">STEP 1 OF 4</div>
+          </div>
+          <div class="prog-wrap"><div class="prog-bar" id="prog1" style="width:25%"></div></div>
+          <div class="symptom-grid" id="symptomGrid"></div>
+        </div>
+      </div>
+      <div class="right-panel">
+        <div class="card body-map-card">
+          <div class="bm-header">
+            <div class="bm-title">Where does it hurt?</div>
+            <div class="bm-toggle">
+              <button class="bm-btn active" id="btnFront">Front</button>
+              <button class="bm-btn" id="btnBack">Back</button>
+            </div>
+          </div>
+          <div class="body-container" id="bodyContainer">
+            <div class="heat-overlay" id="heatOverlay"></div>
+            <svg viewBox="0 0 100 220" class="body-svg" id="bodySvg">
+              <!-- Head -->
+              <path d="M38 22 C38 6 62 6 62 22 C62 34 57 40 57 46 C57 50 43 50 43 46 C43 40 38 34 38 22 Z" data-zone="head"/>
+              <!-- Neck/Throat -->
+              <path d="M43 46 L57 46 L60 56 L40 56 Z" data-zone="throat"/>
+              <!-- Chest -->
+              <path d="M28 56 L72 56 C78 56 82 64 79 84 L74 106 L26 106 L21 84 C18 64 22 56 28 56 Z" data-zone="chest"/>
+              <!-- Abdomen -->
+              <path d="M26 106 L74 106 L70 148 L30 148 Z" data-zone="abdomen"/>
+              <!-- Left Arm -->
+              <path d="M28 56 C18 58 12 68 11 86 L8 136 C8 141 14 141 14 136 L22 86 Z" data-zone="arms"/>
+              <!-- Right Arm -->
+              <path d="M72 56 C82 58 88 68 89 86 L92 136 C92 141 86 141 86 136 L78 86 Z" data-zone="arms"/>
+              <!-- Left Leg -->
+              <path d="M30 148 L47 148 L44 200 C44 206 32 206 32 200 Z" data-zone="legs"/>
+              <!-- Right Leg -->
+              <path d="M53 148 L70 148 L68 200 C68 206 56 206 56 200 Z" data-zone="legs"/>
+            </svg>
+            <!-- Dots injected by JS -->
+          </div>
+          <div class="zone-chips" id="zoneChips"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION C: AI TRIAGE CHAT ── -->
+    <section class="section-c" id="sectionC">
+      <div class="chat-panel">
+        <div class="card" style="padding-bottom:18px;">
+          <div style="margin-bottom:12px;">
+            <div id="chatStepBadge" style="font-size:11px;font-weight:700;color:var(--orange);background:#fff7ed;padding:3px 9px;border-radius:10px;display:inline-block;margin-bottom:4px;">STEP 2 OF 4</div>
+            <div id="chatStepTitle" style="font-size:17px;font-weight:700;">Symptom Duration</div>
+          </div>
+          <div class="prog-wrap"><div class="prog-bar" id="prog2" style="width:50%"></div></div>
+          <div class="chat-history" id="chatHistory"></div>
+        </div>
+      </div>
+      <div class="need-help-card">
+        <div class="nh-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.38 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <div class="nh-title">Need Help?</div>
+        <p class="nh-sub">If you have a medical emergency, please call emergency services immediately or speak with a doctor now.</p>
+        <button class="btn-talk" onclick="openModal()">Talk to Doctor Now</button>
+      </div>
+    </section>
+
+    <!-- ── SECTION D: AI SUMMARY ── -->
+    <section class="card summary-card" id="sectionD">
+      <div class="col-div">
+        <div class="sum-label">Symptom Recap</div>
+        <ul class="recap-list" id="recapList"></ul>
+      </div>
+      <div class="col-div" style="display:flex;flex-direction:column;justify-content:center;">
+        <div class="urgency-badge badge-orange" id="urgencyBadge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>SEE DOCTOR SOON</span>
+        </div>
+        <div class="urgency-title" id="urgencyTitle">Moderate Urgency</div>
+        <p class="urgency-msg" id="urgencyMsg">Clinical Boutique AI suggests a review within 24 hours.</p>
+        <div class="sum-actions">
+          <button class="btn-save">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Save Report
+          </button>
+          <button class="btn-book" onclick="openModal()">
+            Book Consult
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+      </div>
+      <div>
+        <div class="sum-label">Recommended Actions</div>
+        <div id="recsList"></div>
+      </div>
+    </section>
+
+  </main><!-- /main-scroll -->
+
+  <!-- ── BOTTOM BAR ── -->
+  <div class="bottom-bar">
+    <div class="bb-left">
+      <div class="av-group">
+        <div class="av-c" style="background:#a5b4fc;color:#3730a3;font-size:9px;font-weight:700;">SL</div>
+        <div class="av-c" style="background:#86efac;color:#166534;font-size:9px;font-weight:700;">CW</div>
+        <div class="av-c" style="background:#fca5a5;color:#991b1b;font-size:9px;font-weight:700;">MP</div>
+        <div class="av-c av-more">+12</div>
+      </div>
+      <div class="bb-info">
+        <div class="bb-avail"><div class="green-dot"></div> Available Doctors:</div>
+        <div class="doc-chips">
+          <div class="doc-chip" onclick="openModal('Dr. Sarah L.','General Physician')">Dr. Sarah L.</div>
+          <div class="doc-chip" onclick="openModal('Dr. Chen W.','Internal Medicine')">Dr. Chen W.</div>
+        </div>
+      </div>
+      <div class="rt-text">Typical response: &lt; 5 mins</div>
+    </div>
+    <div>
+      <button class="btn-priority" onclick="openModal()">
+        Book Priority Consultation
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- MIC FAB -->
+  <button class="mic-fab" id="micBtn" title="Voice input">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+  </button>
+  <div class="speech-bub" id="speechBub">Listening...</div>
+
+</div><!-- /main-wrapper -->
+
+<!-- ── BOOKING MODAL ── -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <div class="modal-doc">
+      <div class="modal-av" id="modalAv">SL</div>
+      <div class="modal-name" id="modalName">Dr. Sarah L.</div>
+      <div class="modal-spec" id="modalSpec">General Physician</div>
+      <div class="modal-avail">Available Today</div>
+    </div>
+    <div class="modal-sec">
+      <span class="modal-lbl">SELECT TIME SLOT</span>
+      <div class="slot-row" id="timeSlots">
+        <div class="slot" onclick="pickSlot(this)">10:00 AM</div>
+        <div class="slot sel" onclick="pickSlot(this)">11:30 AM</div>
+        <div class="slot" onclick="pickSlot(this)">2:00 PM</div>
+        <div class="slot" onclick="pickSlot(this)">3:30 PM</div>
+        <div class="slot" onclick="pickSlot(this)">5:00 PM</div>
+      </div>
+    </div>
+    <div class="modal-sec">
+      <span class="modal-lbl">CONSULTATION TYPE</span>
+      <div class="slot-row" id="typeSlots">
+        <div class="slot sel" onclick="pickType(this)">📹 Video Call</div>
+        <div class="slot" onclick="pickType(this)">🏥 In-Person</div>
+      </div>
+    </div>
+    <button class="btn-confirm" onclick="confirmBooking()">Confirm Booking</button>
+    <button class="btn-cancel-lnk" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span id="toastMsg">Appointment confirmed!</span>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+const state = {
+  currentStep: 1,
+  selectedSymptom: null,
+  answers: [],
+  bodyZones: [],
+  urgencyLevel: null
+};
+
+// ─── DATA ─────────────────────────────────────────────────
+const SYMPTOMS = [
+  { id:'fever',       name:'Fever',        icon:'🌡️', color:'orange' },
+  { id:'cold_cough',  name:'Cold & Cough', icon:'❄️',  color:'blue'   },
+  { id:'nausea',      name:'Nausea',       icon:'💫',  color:'purple' },
+  { id:'headache',    name:'Headache',     icon:'🤕',  color:'green'  },
+  { id:'chest_pain',  name:'Chest Pain',   icon:'❤️',  color:'red'    },
+  { id:'dizziness',   name:'Dizziness',    icon:'🌀',  color:'yellow' },
+  { id:'short_breath',name:'Short Breath', icon:'🫁',  color:'cyan'   },
+  { id:'other',       name:'Other',        icon:'➕',  color:'gray'   }
+];
+
+const FLOWS = {
+  cold_cough: [
+    { step:2, q:'How long have you had these symptoms?',                opts:['Just started','1–2 days','3–5 days','A week+'] },
+    { step:3, q:'How severe is your throat discomfort?',                opts:['Mild','Moderate','Severe','Unbearable'] },
+    { step:4, q:'Any additional symptoms?',                             opts:['Runny nose','Fever','Body aches','None of these'] }
+  ],
+  fever: [
+    { step:2, q:'How high is your temperature?',                        opts:['Below 100°F','100–102°F','Above 102°F','Not measured'] },
+    { step:3, q:'How long have you had the fever?',                     opts:['Today','2–3 days','4–5 days','A week+'] },
+    { step:4, q:'Any other symptoms with the fever?',                   opts:['Chills','Headache','Body pain','None'] }
+  ],
+  headache: [
+    { step:2, q:'Where is the pain located?',                           opts:['Forehead','Temples','Back of head','Whole head'] },
+    { step:3, q:'How severe is the headache?',                          opts:['Mild','Moderate','Severe','Migraine level'] },
+    { step:4, q:'Any other symptoms?',                                  opts:['Nausea','Light sensitivity','Neck stiffness','None'] }
+  ],
+  chest_pain: [
+    { step:2, q:'How would you describe the chest pain?',               opts:['Sharp','Dull ache','Pressure','Burning'] },
+    { step:3, q:'How severe is it?',                                    opts:['Mild','Moderate','Severe','Unbearable'] },
+    { step:4, q:'Any accompanying symptoms?',                           opts:['Shortness of breath','Dizziness','Sweating','None'] }
+  ],
+  default: [
+    { step:2, q:'How long have you had this symptom?',                  opts:['Just started','1–2 days','3–5 days','A week+'] },
+    { step:3, q:'How severe is it?',                                    opts:['Mild','Moderate','Severe','Unbearable'] },
+    { step:4, q:'Any other symptoms?',                                  opts:['Fever','Pain','Fatigue','None of these'] }
+  ]
+};
+
+const STEP_NAMES = { 2:'Symptom Duration', 3:'Severity Check', 4:'Additional Symptoms' };
+
+const RECOMMENDATIONS = {
+  cold_cough: {
+    high:     ['Call a doctor immediately','Take prescribed medication','Rest completely'],
+    moderate: ['Hydrate with warm fluids','Saline gargle twice daily','Monitor temperature every 4 hrs'],
+    low:      ['Warm honey-lemon tea','Rest and sleep well','OTC lozenges for throat']
+  },
+  fever: {
+    high:     ['Take prescribed antipyretics','Cold compress on forehead','Visit clinic if above 103°F'],
+    moderate: ['Stay hydrated','Monitor temperature every 2 hrs','Rest in a cool room'],
+    low:      ['Drink plenty of fluids','Light meals only','Monitor for changes']
+  },
+  headache: {
+    high:     ['Rest in a dark, quiet room','Seek urgent care if vision changes','Avoid all screens'],
+    moderate: ['Rest and stay hydrated','OTC pain relief if needed','Avoid bright light'],
+    low:      ['Drink water and rest','Gentle neck stretches','Reduce screen time']
+  },
+  chest_pain: {
+    high:     ['Call emergency services NOW','Do not drive yourself','Sit upright, loosen clothing'],
+    moderate: ['Avoid strenuous activity','See a doctor within 24 hrs','Monitor for worsening'],
+    low:      ['Rest and breathe slowly','Avoid caffeine','Contact clinic if pain persists']
+  },
+  default: {
+    high:     ['Seek immediate medical attention','Do not ignore worsening symptoms','Call your doctor now'],
+    moderate: ['Rest at home','Stay hydrated','See a doctor if not improving in 24 hrs'],
+    low:      ['Rest quietly','Drink clear fluids','Monitor for changes']
+  }
+};
+
+const DOT_POSITIONS = {
+  head:    { top:'13%', left:'50%' },
+  throat:  { top:'23%', left:'50%' },
+  chest:   { top:'35%', left:'50%' },
+  abdomen: { top:'50%', left:'50%' },
+  arms:    { top:'40%', left:'18%' },
+  legs:    { top:'72%', left:'50%' },
+  back:    { top:'35%', left:'80%' }
+};
+
+const ZONE_LABELS = {
+  head:'Head', throat:'Throat Area', chest:'Chest/Lungs',
+  abdomen:'Abdomen', arms:'Arms', legs:'Legs', back:'Back'
+};
+
+// ─── DOM REFS ─────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const els = {
+  btnWell:    $('btnWell'),    btnNotWell: $('btnNotWell'),
+  wellMsg:    $('msgWell'),    sectionB:   $('sectionB'),
+  sectionC:   $('sectionC'),  sectionD:   $('sectionD'),
+  grid:       $('symptomGrid'),
+  prog1:      $('prog1'),      prog2:      $('prog2'),
+  chatHist:   $('chatHistory'),
+  bodySvg:    $('bodySvg'),    bodyContainer: $('bodyContainer'),
+  heatOverlay:$('heatOverlay'),zoneChips:  $('zoneChips'),
+  chatBadge:  $('chatStepBadge'), chatTitle:$('chatStepTitle'),
+  micBtn:     $('micBtn'),     speechBub:  $('speechBub'),
+  modal:      $('bookingModal'),toast:     $('toast'),toastMsg:$('toastMsg')
+};
+
+// ─── INIT GRID ────────────────────────────────────────────
+function initGrid() {
+  els.grid.innerHTML = SYMPTOMS.map(s => `
+    <div class="symptom-card" data-id="${s.id}" onclick="selectSymptom('${s.id}')">
+      <div class="sc-icon bg-${s.color}">${s.icon}</div>
+      <div class="sc-name">${s.name}</div>
+    </div>
+  `).join('');
+}
+
+// ─── CONFETTI ─────────────────────────────────────────────
+function confetti(x, y) {
+  const cols = ['#16a34a','#22c55e','#4ade80','#86efac','#bbf7d0','#fbbf24'];
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div');
+    p.className = 'conf-p';
+    p.style.cssText = `left:${x+(Math.random()-.5)*100}px;top:${y+(Math.random()-.5)*50}px;
+      background:${cols[Math.floor(Math.random()*cols.length)]};
+      animation-delay:${Math.random()*.5}s;transform:rotate(${Math.random()*360}deg);`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1800);
+  }
+}
+
+// ─── HERO BUTTONS ─────────────────────────────────────────
+els.btnWell.addEventListener('click', e => {
+  const r = els.btnWell.getBoundingClientRect();
+  confetti(r.left + r.width/2, r.top);
+  els.wellMsg.style.display = 'flex';
+  els.sectionB.classList.remove('visible');
+  els.sectionC.classList.remove('visible');
+  els.sectionD.classList.remove('visible');
+});
+
+els.btnNotWell.addEventListener('click', () => {
+  els.wellMsg.style.display = 'none';
+  els.sectionB.classList.add('visible');
+  setTimeout(() => els.sectionB.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+});
+
+// ─── SELECT SYMPTOM ───────────────────────────────────────
+window.selectSymptom = function(id) {
+  if (state.selectedSymptom && state.selectedSymptom !== id) {
+    // reset on change
+    state.answers = [];
+    state.currentStep = 1;
+    state.urgencyLevel = null;
+    els.chatHist.innerHTML = '';
+    els.sectionD.classList.remove('visible');
+    els.sectionD.style.display = 'none';
+  }
+  state.selectedSymptom = id;
+  state.currentStep = 2;
+
+  // highlight selected card
+  document.querySelectorAll('.symptom-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.symptom-card[data-id="${id}"]`).classList.add('active');
+  els.prog1.style.width = '50%';
+
+  // body map effects
+  els.heatOverlay.classList.remove('active');
+  document.querySelectorAll('.body-dot').forEach(d => d.remove());
+  state.bodyZones = [];
+  renderZoneChips();
+
+  if (id === 'fever') els.heatOverlay.classList.add('active');
+  if (id === 'cold_cough') { addDot('throat','red'); addDot('chest','blue'); }
+  if (id === 'headache') addDot('head','red');
+  if (id === 'chest_pain') addDot('chest','red');
+
+  // start chat
+  els.sectionC.classList.add('visible');
+  renderStep(2);
+  setTimeout(() => els.sectionC.scrollIntoView({ behavior:'smooth', block:'start' }), 300);
+  console.log('State:', JSON.stringify(state));
+};
+
+// ─── BODY MAP DOTS ────────────────────────────────────────
+document.querySelectorAll('.body-svg path').forEach(path => {
+  path.addEventListener('click', e => {
+    const zone = e.target.getAttribute('data-zone');
+    const existing = document.querySelector(`.body-dot[data-zone="${zone}"]`);
+    if (existing) {
+      existing.remove();
+      state.bodyZones = state.bodyZones.filter(z => z.zone !== zone);
+    } else {
+      const color = ['head','throat','chest','abdomen'].includes(zone) ? 'red' : 'blue';
+      addDot(zone, color);
+    }
+    renderZoneChips();
+  });
+});
+
+$('btnFront').addEventListener('click', () => { $('btnFront').classList.add('active'); $('btnBack').classList.remove('active'); });
+$('btnBack').addEventListener('click',  () => { $('btnBack').classList.add('active'); $('btnFront').classList.remove('active'); });
+
+function addDot(zone, color) {
+  if (document.querySelector(`.body-dot[data-zone="${zone}"]`)) return;
+  const pos = DOT_POSITIONS[zone];
+  if (!pos) return;
+  const dot = document.createElement('div');
+  dot.className = `body-dot ${color}`;
+  dot.setAttribute('data-zone', zone);
+  dot.style.top = pos.top;
+  dot.style.left = pos.left;
+  dot.style.transform = 'translate(-50%,-50%)';
+  els.bodyContainer.appendChild(dot);
+  state.bodyZones.push({ zone, color });
+}
+
+function renderZoneChips() {
+  els.zoneChips.innerHTML = state.bodyZones.map(z =>
+    `<div class="zone-chip ${z.color}">${z.color==='red'?'🔴':'🔵'} ${ZONE_LABELS[z.zone]} – ${z.color==='red'?'Pain':'Discomfort'}</div>`
+  ).join('');
+}
+
+// ─── CHAT STEP ────────────────────────────────────────────
+function getFlow() { return FLOWS[state.selectedSymptom] || FLOWS.default; }
+
+function renderStep(stepNum) {
+  const flow = getFlow();
+  const data = flow.find(s => s.step === stepNum);
+  if (!data) { showSummary(); return; }
+
+  els.prog2.style.width = `${(stepNum/4)*100}%`;
+  els.chatBadge.textContent = `STEP ${stepNum} OF 4`;
+  els.chatTitle.textContent = STEP_NAMES[stepNum] || 'Follow-up';
+
+  const div = document.createElement('div');
+  div.className = 'chat-step';
+  div.id = `cs-${stepNum}`;
+
+  const chips = data.opts.map(o =>
+    `<button class="chip" onclick="answer(${stepNum},'${o.replace(/'/g,"&#39;")}')">${o}</button>`
+  ).join('');
+
+  div.innerHTML = `
+    <div class="chat-bubble">
+      <div class="bot-av">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <span>${data.q}</span>
+    </div>
+    <div id="ua-${stepNum}" class="user-ans" style="display:none;"></div>
+    <div class="chat-chips" id="chips-${stepNum}">${chips}</div>
+  `;
+  els.chatHist.appendChild(div);
+  div.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+window.answer = function(stepNum, opt) {
+  const div = $(`cs-${stepNum}`);
+  if (!div) return;
+
+  // show answer, hide chips
+  const ua = $(`ua-${stepNum}`);
+  ua.textContent = '✓ ' + opt;
+  ua.style.display = 'inline-flex';
+  $(`chips-${stepNum}`).style.display = 'none';
+
+  state.answers[stepNum-2] = opt;
+
+  // urgency detection at step 3 (severity)
+  if (stepNum === 3) {
+    const l = opt.toLowerCase();
+    if (l.includes('severe') || l.includes('unbearable') || l.includes('migraine')) state.urgencyLevel = 'high';
+    else if (l.includes('moderate')) state.urgencyLevel = 'moderate';
+    else state.urgencyLevel = 'low';
+  }
+  // fever step 2 temp shortcut
+  if (stepNum === 2 && opt.includes('102')) state.urgencyLevel = 'high';
+
+  state.currentStep = stepNum + 1;
+  setTimeout(() => { renderStep(state.currentStep); }, 350);
+  console.log('State:', JSON.stringify(state));
+};
+
+// ─── SUMMARY CARD ─────────────────────────────────────────
+function showSummary() {
+  els.prog1.style.width = '100%';
+  els.prog2.style.width = '100%';
+
+  const sym = SYMPTOMS.find(s => s.id === state.selectedSymptom);
+  // Recap
+  let html = '';
+  const checkSvg = `<svg class="recap-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+  html += `<li class="recap-item">${checkSvg}${sym.icon} ${sym.name}</li>`;
+  state.answers.forEach((a, i) => {
+    const step = i + 2;
+    const flow = getFlow();
+    const d = flow.find(s => s.step === step);
+    if (a && a !== 'None' && a !== 'None of these' && d) {
+      html += `<li class="recap-item">${checkSvg}${d.q.split('?')[0].replace('How','').trim()}: ${a}</li>`;
+    }
+  });
+  $('recapList').innerHTML = html;
+
+  // Urgency
+  const badge = $('urgencyBadge');
+  const title = $('urgencyTitle');
+  const msg   = $('urgencyMsg');
+  const lvl   = state.urgencyLevel || 'low';
+
+  const iconWarn = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>`;
+  const iconInfo = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+  const iconOk   = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+
+  if (lvl === 'high') {
+    badge.className = 'urgency-badge badge-red';
+    badge.innerHTML = iconWarn + '<span>SEE DOCTOR NOW</span>';
+    title.textContent = 'High Urgency';
+    msg.textContent   = 'Please consult a doctor immediately.';
+  } else if (lvl === 'moderate') {
+    badge.className = 'urgency-badge badge-orange';
+    badge.innerHTML = iconInfo + '<span>SEE DOCTOR SOON</span>';
+    title.textContent = 'Moderate Urgency';
+    msg.textContent   = 'Clinical Boutique AI suggests review within 24 hours.';
+  } else {
+    badge.className = 'urgency-badge badge-green';
+    badge.innerHTML = iconOk + '<span>MONITOR AT HOME</span>';
+    title.textContent = 'Low Urgency';
+    msg.textContent   = 'Rest and monitor. Follow the home care tips below.';
+  }
+
+  // Recommendations
+  const recs = (RECOMMENDATIONS[state.selectedSymptom] || RECOMMENDATIONS.default)[lvl];
+  $('recsList').innerHTML = recs.map(r =>
+    `<div class="rec-item"><span class="rec-bullet">•</span>${r}</div>`
+  ).join('');
+
+  // Show card (force transition)
+  els.sectionD.style.display = 'grid';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    els.sectionD.classList.add('visible');
+    setTimeout(() => els.sectionD.scrollIntoView({ behavior:'smooth', block:'start' }), 200);
+  }));
+}
+
+// ─── MODAL ────────────────────────────────────────────────
+window.openModal = function(name='Dr. Sarah L.', spec='General Physician') {
+  $('modalName').textContent = name;
+  $('modalSpec').textContent = spec;
+  const initials = name.replace('Dr.','').trim().split(' ').map(n=>n[0]).join('').substring(0,2);
+  $('modalAv').textContent = initials;
+  els.modal.classList.add('open');
+};
+window.closeModal = function() { els.modal.classList.remove('open'); };
+
+window.pickSlot = function(el) {
+  document.querySelectorAll('#timeSlots .slot').forEach(s => s.classList.remove('sel'));
+  el.classList.add('sel');
+};
+window.pickType = function(el) {
+  document.querySelectorAll('#typeSlots .slot').forEach(s => s.classList.remove('sel'));
+  el.classList.add('sel');
+};
+window.confirmBooking = function() {
+  const time = document.querySelector('#timeSlots .sel')?.textContent || '11:30 AM';
+  const name = $('modalName').textContent;
+  closeModal();
+  els.toastMsg.textContent = `✓ Appointment confirmed with ${name} at ${time}`;
+  els.toast.classList.add('show');
+  setTimeout(() => els.toast.classList.remove('show'), 4000);
+};
+
+// close modal on overlay click
+els.modal.addEventListener('click', e => { if (e.target === els.modal) closeModal(); });
+
+// ─── VOICE INPUT ──────────────────────────────────────────
+let recognition = null;
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    els.micBtn.classList.add('listening');
+    els.speechBub.textContent = '🎤 Listening...';
+    els.speechBub.classList.add('show');
+  };
+  recognition.onresult = e => {
+    let t = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+    els.speechBub.textContent = `"${t}"`;
+    const l = t.toLowerCase();
+    if (state.currentStep === 1) {
+      if (l.match(/fever|temperature|hot/))     selectSymptom('fever');
+      else if (l.match(/cold|cough|throat/))    selectSymptom('cold_cough');
+      else if (l.match(/headache|head ache/))   selectSymptom('headache');
+      else if (l.match(/chest/))                selectSymptom('chest_pain');
+      else if (l.match(/nausea|sick|vomit/))    selectSymptom('nausea');
+      else if (l.match(/dizzy|dizziness/))      selectSymptom('dizziness');
+      else if (l.match(/breath|breathing/))     selectSymptom('short_breath');
+    } else {
+      document.querySelectorAll('.chat-chips:not([style*="none"]) .chip').forEach(c => {
+        if (l.includes(c.textContent.toLowerCase())) c.click();
+      });
+    }
+  };
+  recognition.onerror = () => {
+    els.speechBub.textContent = "Didn't catch that. Try again.";
+    setTimeout(() => { els.speechBub.classList.remove('show'); els.micBtn.classList.remove('listening'); }, 2200);
+  };
+  recognition.onend = () => {
+    els.micBtn.classList.remove('listening');
+    setTimeout(() => els.speechBub.classList.remove('show'), 2500);
+  };
+}
+
+els.micBtn.addEventListener('click', () => {
+  if (!recognition) {
+    els.speechBub.textContent = 'Voice input not supported in this browser.';
+    els.speechBub.classList.add('show');
+    setTimeout(() => els.speechBub.classList.remove('show'), 2500);
+    return;
+  }
+  if (els.micBtn.classList.contains('listening')) recognition.stop();
+  else recognition.start();
+});
+
+// ─── BOOT ─────────────────────────────────────────────────
+initGrid();
+</script>
+</body>
+</html>
